@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
+import { Route as AuthenticatedAdminRestaurantsRouteImport } from './routes/_authenticated/admin.restaurants'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -46,6 +47,12 @@ const AuthenticatedChangePasswordRoute =
     path: '/change-password',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRestaurantsRoute =
+  AuthenticatedAdminRestaurantsRouteImport.update({
+    id: '/admin/restaurants',
+    path: '/admin/restaurants',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -60,6 +68,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -69,6 +78,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/change-password': typeof AuthenticatedChangePasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -78,8 +88,15 @@ export interface FileRouteTypes {
     | '/auth'
     | '/change-password'
     | '/dashboard'
+    | '/admin/restaurants'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/access-denied' | '/auth' | '/change-password' | '/dashboard'
+  to:
+    | '/'
+    | '/access-denied'
+    | '/auth'
+    | '/change-password'
+    | '/dashboard'
+    | '/admin/restaurants'
   id:
     | '__root__'
     | '/'
@@ -88,6 +105,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/change-password'
     | '/_authenticated/dashboard'
+    | '/_authenticated/admin/restaurants'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -141,17 +159,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChangePasswordRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/restaurants': {
+      id: '/_authenticated/admin/restaurants'
+      path: '/admin/restaurants'
+      fullPath: '/admin/restaurants'
+      preLoaderRoute: typeof AuthenticatedAdminRestaurantsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedChangePasswordRoute: typeof AuthenticatedChangePasswordRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedAdminRestaurantsRoute: typeof AuthenticatedAdminRestaurantsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChangePasswordRoute: AuthenticatedChangePasswordRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedAdminRestaurantsRoute: AuthenticatedAdminRestaurantsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
