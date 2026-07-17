@@ -1,0 +1,60 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Web
+        run: npm run build
+
+      - name: Install Capacitor
+        run: npm install @capacitor/core @capacitor/cli @capacitor/android@6
+
+      - name: Sync Android
+        run: npx cap sync android
+
+      - name: Generate Debug Keystore
+        run: |
+          cd android
+          keytool -genkeypair \
+            -alias androiddebugkey \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass android \
+            -keypass android \
+            -keystore app/debug.keystore \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BATMENU-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
