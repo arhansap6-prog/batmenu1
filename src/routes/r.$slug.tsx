@@ -151,7 +151,7 @@ function PublicMenu() {
     });
   }
 
-  async function askAI(e: React.FormEvent) {
+  async function askAI(e: FormEvent) {
     e.preventDefault();
     if (!aiQuery.trim()) return;
     setAiLoading(true);
@@ -537,7 +537,7 @@ function FilterChip({
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <button
