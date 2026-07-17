@@ -79,7 +79,8 @@ function OrdersPage() {
     );
   }
 
-  const buckets: Record<Status, typeof ordersQ.data> = {
+  type Order = NonNullable<typeof ordersQ.data>[number];
+  const buckets: Record<Status, Order[]> = {
     pending: [],
     preparing: [],
     ready: [],
