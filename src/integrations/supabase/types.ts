@@ -14,16 +14,325 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          restaurant_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          restaurant_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          restaurant_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      food_items: {
+        Row: {
+          allergy_info: string | null
+          calories: number | null
+          category_id: string | null
+          created_at: string
+          description: string | null
+          discount_price: number | null
+          id: string
+          image_url: string | null
+          ingredients: string | null
+          is_available: boolean
+          is_chef_recommended: boolean
+          is_todays_special: boolean
+          is_veg: boolean
+          name: string
+          prep_time_minutes: number | null
+          price: number
+          restaurant_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          allergy_info?: string | null
+          calories?: number | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          discount_price?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string | null
+          is_available?: boolean
+          is_chef_recommended?: boolean
+          is_todays_special?: boolean
+          is_veg?: boolean
+          name: string
+          prep_time_minutes?: number | null
+          price?: number
+          restaurant_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          allergy_info?: string | null
+          calories?: number | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          discount_price?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string | null
+          is_available?: boolean
+          is_chef_recommended?: boolean
+          is_todays_special?: boolean
+          is_veg?: boolean
+          name?: string
+          prep_time_minutes?: number | null
+          price?: number
+          restaurant_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_items_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          mobile: string | null
+          must_change_password: boolean
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          mobile?: string | null
+          must_change_password?: boolean
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          mobile?: string | null
+          must_change_password?: boolean
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      restaurants: {
+        Row: {
+          category: string | null
+          country: string | null
+          cover_url: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          intro_video_url: string | null
+          is_active: boolean
+          language: string
+          logo_url: string | null
+          menu_intro_video_url: string | null
+          name: string
+          owner_id: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          slug: string
+          theme: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          country?: string | null
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          intro_video_url?: string | null
+          is_active?: boolean
+          language?: string
+          logo_url?: string | null
+          menu_intro_video_url?: string | null
+          name: string
+          owner_id?: string | null
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          slug: string
+          theme?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          country?: string | null
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          intro_video_url?: string | null
+          is_active?: boolean
+          language?: string
+          logo_url?: string | null
+          menu_intro_video_url?: string | null
+          name?: string
+          owner_id?: string | null
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          slug?: string
+          theme?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          restaurant_id: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          restaurant_id?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          restaurant_id?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      user_can_edit_restaurant: {
+        Args: { _restaurant_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_manages_restaurant: {
+        Args: { _restaurant_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "super_admin"
+        | "owner"
+        | "manager"
+        | "cashier"
+        | "chef"
+        | "kitchen"
+        | "waiter"
+        | "designer"
+        | "viewer"
+      subscription_plan:
+        | "free"
+        | "starter"
+        | "basic"
+        | "professional"
+        | "premium"
+        | "enterprise"
+        | "unlimited"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +459,27 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "super_admin",
+        "owner",
+        "manager",
+        "cashier",
+        "chef",
+        "kitchen",
+        "waiter",
+        "designer",
+        "viewer",
+      ],
+      subscription_plan: [
+        "free",
+        "starter",
+        "basic",
+        "professional",
+        "premium",
+        "enterprise",
+        "unlimited",
+      ],
+    },
   },
 } as const
