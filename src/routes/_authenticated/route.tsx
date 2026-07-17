@@ -34,7 +34,6 @@ function AuthLayout() {
     );
   }
 
-  // Force password change on first login (except while on that page itself)
   if (
     session.mustChangePassword &&
     typeof window !== "undefined" &&
@@ -49,10 +48,15 @@ function AuthLayout() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/dashboard" className="flex items-center gap-2">
             <div className="grid h-7 w-7 place-items-center rounded-md gradient-red">
-              <span className="font-display text-xs font-bold text-primary-foreground">B</span>
+              <span className="font-display text-xs font-bold text-primary-foreground">
+                B
+              </span>
             </div>
-            <span className="font-display text-base font-semibold tracking-wide">BAT MENU</span>
+            <span className="font-display text-base font-semibold tracking-wide">
+              BAT MENU
+            </span>
           </Link>
+
           <nav className="flex items-center gap-1 text-sm">
             <Link
               to="/dashboard"
@@ -62,6 +66,7 @@ function AuthLayout() {
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
             </Link>
+
             {session.isSuperAdmin && (
               <Link
                 to="/admin/restaurants"
@@ -72,6 +77,7 @@ function AuthLayout() {
                 <span className="hidden sm:inline">Restaurants</span>
               </Link>
             )}
+
             {session.primaryRestaurantId && (
               <Link
                 to="/orders"
@@ -83,6 +89,7 @@ function AuthLayout() {
                 <span className="hidden sm:inline">Orders</span>
               </Link>
             )}
+
             <Link
               to="/change-password"
               className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -90,6 +97,7 @@ function AuthLayout() {
               <KeyRound className="h-4 w-4" />
               <span className="hidden sm:inline">Password</span>
             </Link>
+
             <button
               onClick={handleSignOut}
               className="ml-1 flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -100,7 +108,8 @@ function AuthLayout() {
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-5 py-8">
+
+      <main className="mx-auto max-w-6xl px-5 pt-12 pb-8">
         <Outlet />
       </main>
     </div>
