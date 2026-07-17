@@ -103,7 +103,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="dark">
       <head><HeadContent /></head>
-      <body>
+      <body className="pt-[env(safe-area-inset-top)]">
         {children}
         <Scripts />
       </body>
