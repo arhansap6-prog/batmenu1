@@ -52,7 +52,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="space-y-8">
+  <div className="space-y-8 pt-6 pb-6">
       <div>
         <p className="text-xs uppercase tracking-widest text-muted-foreground">
           Welcome back{session.user?.email ? `, ${session.user.email}` : ""}
