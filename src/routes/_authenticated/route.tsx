@@ -72,6 +72,17 @@ function AuthLayout() {
                 <span className="hidden sm:inline">Restaurants</span>
               </Link>
             )}
+            {session.primaryRestaurantId && (
+              <Link
+                to="/orders"
+                search={{ r: session.primaryRestaurantId }}
+                className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                activeProps={{ className: "text-foreground bg-accent" }}
+              >
+                <ClipboardList className="h-4 w-4" />
+                <span className="hidden sm:inline">Orders</span>
+              </Link>
+            )}
             <Link
               to="/change-password"
               className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
