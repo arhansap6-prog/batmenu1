@@ -169,6 +169,98 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          created_at: string
+          food_item_id: string | null
+          id: string
+          name: string
+          order_id: string
+          price: number
+          qty: number
+        }
+        Insert: {
+          created_at?: string
+          food_item_id?: string | null
+          id?: string
+          name: string
+          order_id: string
+          price: number
+          qty: number
+        }
+        Update: {
+          created_at?: string
+          food_item_id?: string | null
+          id?: string
+          name?: string
+          order_id?: string
+          price?: number
+          qty?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_food_item_id_fkey"
+            columns: ["food_item_id"]
+            isOneToOne: false
+            referencedRelation: "food_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          currency: string
+          customer_name: string | null
+          id: string
+          notes: string | null
+          restaurant_id: string
+          status: Database["public"]["Enums"]["order_status"]
+          table_number: string | null
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          customer_name?: string | null
+          id?: string
+          notes?: string | null
+          restaurant_id: string
+          status?: Database["public"]["Enums"]["order_status"]
+          table_number?: string | null
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          customer_name?: string | null
+          id?: string
+          notes?: string | null
+          restaurant_id?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          table_number?: string | null
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -325,6 +417,7 @@ export type Database = {
         | "waiter"
         | "designer"
         | "viewer"
+      order_status: "pending" | "preparing" | "ready" | "served" | "cancelled"
       subscription_plan:
         | "free"
         | "starter"
@@ -471,6 +564,7 @@ export const Constants = {
         "designer",
         "viewer",
       ],
+      order_status: ["pending", "preparing", "ready", "served", "cancelled"],
       subscription_plan: [
         "free",
         "starter",
