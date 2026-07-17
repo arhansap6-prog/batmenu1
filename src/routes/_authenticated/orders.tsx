@@ -142,7 +142,7 @@ function label(s: Status) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-type Order = NonNullable<ReturnType<typeof useQuery<any, any, any[]>>["data"]>[number];
+type Order = { id: string; table_number: string | null; customer_name: string | null; notes: string | null; total: number; currency: string; status: string; created_at: string; order_items: { name: string; price: number; qty: number }[] | null };
 
 function Column({
   title,
