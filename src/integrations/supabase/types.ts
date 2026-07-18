@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_intro_videos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          storage_path?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
