@@ -127,7 +127,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <IntroVideoGate>
+        <Outlet />
+      </IntroVideoGate>
       <Toaster theme="dark" position="top-right" richColors />
     </QueryClientProvider>
   );
