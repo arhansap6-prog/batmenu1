@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, LayoutDashboard, Store, KeyRound, ClipboardList } from "lucide-react";
+import { LogOut, LayoutDashboard, Store, KeyRound, ClipboardList, Film } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession, signOut } from "@/lib/use-session";
 import { useQueryClient } from "@tanstack/react-query";
