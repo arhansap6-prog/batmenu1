@@ -13,6 +13,7 @@ import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
+import { IntroVideoGate } from "@/components/IntroVideoGate";
 
 function NotFoundComponent() {
   return (
@@ -126,7 +127,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <IntroVideoGate>
+        <Outlet />
+      </IntroVideoGate>
       <Toaster theme="dark" position="top-right" richColors />
     </QueryClientProvider>
   );

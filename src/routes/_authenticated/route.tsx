@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, LayoutDashboard, Store, KeyRound, ClipboardList } from "lucide-react";
+import { LogOut, LayoutDashboard, Store, KeyRound, ClipboardList, Film } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession, signOut } from "@/lib/use-session";
 import { useQueryClient } from "@tanstack/react-query";
@@ -75,6 +75,17 @@ function AuthLayout() {
               >
                 <Store className="h-4 w-4" />
                 <span className="hidden sm:inline">Restaurants</span>
+              </Link>
+            )}
+
+            {session.isSuperAdmin && (
+              <Link
+                to="/admin/intro-video"
+                className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                activeProps={{ className: "text-foreground bg-accent" }}
+              >
+                <Film className="h-4 w-4" />
+                <span className="hidden sm:inline">Intro Video</span>
               </Link>
             )}
 
