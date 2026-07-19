@@ -11,7 +11,6 @@ import { mergeConfig, type TemplateConfig } from "@/lib/menu-template";
 import { ViewIn3DButton } from "@/components/ViewIn3D";
 
 import { FireBookMenu } from "@/components/FireBookMenu";
-(Integrate FireBook menu in public menu)
 
 const menuQueryOptions = (slug: string) =>
   queryOptions({
@@ -278,7 +277,7 @@ function PublicMenu() {
         </nav>
       </header>
 
-      {tab === "menu" && (
+      {tab === "home" && (
         <div className="sticky top-0 z-30 border-b backdrop-blur" style={{ background: `${template.background}dd`, borderColor: `${template.textColor}22` }}>
           <div className="mx-auto max-w-3xl px-5 py-3">
             <div className="relative">
@@ -302,50 +301,23 @@ function PublicMenu() {
       )}
 
       <main className="mx-auto max-w-3xl px-5 py-8">
-        {tab === "home" && (
-          <div className="space-y-6 text-center">
-            <p className="text-sm" style={{ color: template.mutedColor }}>
-              Welcome to {r.name}. Browse the full menu or tap Offers for today's specials.
-            </p>
-            <button
-              onClick={() => setAiOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white"
-              style={{ background: `linear-gradient(135deg, ${template.accentFrom}, ${template.accentTo})` }}
-            >
-              <Sparkles className="h-4 w-4" /> Ask the AI concierge
-            </button>
-            <div className="grid gap-3 pt-6 sm:grid-cols-2">
-              <button onClick={() => setTab("menu")} className="rounded-2xl border p-6 text-left" style={{ background: template.surface, borderColor: `${template.textColor}22` }}>
-                <UtensilsCrossed className="h-5 w-5" style={{ color: template.accentFrom }} />
-                <p className="mt-2 text-lg font-semibold" style={headingStyle}>Full menu</p>
-                <p className="text-xs" style={{ color: template.mutedColor }}>{items.length} dishes across {categories.length} categories</p>
-              </button>
-              <button onClick={() => setTab("offers")} className="rounded-2xl border p-6 text-left" style={{ background: template.surface, borderColor: `${template.textColor}22` }}>
-                <Flame className="h-5 w-5" style={{ color: template.accentFrom }} />
-                <p className="mt-2 text-lg font-semibold" style={headingStyle}>Today's offers</p>
-                <p className="text-xs" style={{ color: template.mutedColor }}>{offers.length} chef-selected specials</p>
-              </button>
-            </div>
-          </div>
-        )}
 
-        {tab === "menu" && (
-          <>
-            {grouped.length === 0 && <p className="text-center text-sm" style={{ color: template.mutedColor }}>No dishes match your search.</p>}
-            <div className="space-y-10">
-              {grouped.map((g) => (
-                <section key={g.key}>
-                  <h2 className="text-xl font-semibold" style={headingStyle}>{g.name}</h2>
-                  <div className="mt-4 space-y-3">
-                    {g.items.map((it) => (
-                      <DishRow key={it.id} it={it} r={r} template={template} isAI={aiIdSet.has(it.id)} cartQty={cart[it.id]?.qty} onAdd={() => addToCart(it)} onBump={(d) => bump(it.id, d)} />
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          </>
-        )}
+       
+       {tab === "menu" && (
+  <FireBookMenu
+    restaurantName={r.name}
+    logoUrl={r.logo_url}
+    currency={r.currency}
+    categories={categories}
+    items={items}
+    template={template}
+    cart={Object.fromEntries(
+      Object.entries(cart).map(([id, l]) => [id, l.qty])
+    )}
+    onAdd={(it) => addToCart(it as any)}
+    onBump={(id, d) => bump(id, d)}
+  />
+)}
 
         {tab === "offers" && (
           <div className="space-y-3">
