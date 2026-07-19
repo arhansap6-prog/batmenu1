@@ -398,3 +398,68 @@ to{
 }
 
 }
+/* PART 8 - FIRE WRAP AROUND BOOK */
+
+.book-container{
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+
+.real-flames{
+  position:absolute;
+  width:650px;
+  height:820px;
+  pointer-events:none;
+  z-index:20;
+}
+
+
+.real-flames span{
+  position:absolute;
+  bottom:0;
+}
+
+
+.real-flames span:nth-child(1){
+  left:5%;
+}
+
+.real-flames span:nth-child(2){
+  left:15%;
+}
+
+.real-flames span:nth-child(3){
+  left:25%;
+}
+
+.real-flames span:nth-child(4){
+  left:35%;
+}
+
+.real-flames span:nth-child(5){
+  left:45%;
+}
+
+.real-flames span:nth-child(6){
+  left:55%;
+}
+
+.real-flames span:nth-child(7){
+  left:65%;
+}
+
+.real-flames span:nth-child(8){
+  left:75%;
+}
+
+.real-flames span:nth-child(9){
+  left:85%;
+}
+
+.real-flames span:nth-child(n+10){
+  bottom:20px;
+}
+
