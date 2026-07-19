@@ -215,3 +215,25 @@ export const clearMustChangePassword = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/** Super Admin — aggregate platform counts for the dashboard. */
+export const platformStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isSA } = await context.supabase.rpc("is_super_admin", { _user_id: context.userId });
+    if (!isSA) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [rTotal, rActive, dTotal, tPub] = await Promise.all([
+      supabaseAdmin.from("restaurants").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("restaurants").select("id", { count: "exact", head: true }).eq("is_active", true),
+      supabaseAdmin.from("food_items").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("menu_templates").select("id", { count: "exact", head: true }).eq("is_published", true),
+    ]);
+    return {
+      restaurants_total: rTotal.count ?? 0,
+      restaurants_active: rActive.count ?? 0,
+      restaurants_suspended: (rTotal.count ?? 0) - (rActive.count ?? 0),
+      dishes_total: dTotal.count ?? 0,
+      templates_published: tPub.count ?? 0,
+    };
+  });
