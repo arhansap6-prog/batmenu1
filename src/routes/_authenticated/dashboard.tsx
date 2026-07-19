@@ -69,6 +69,9 @@ function Dashboard() {
         )}
       </div>
 
+      {session.isSuperAdmin && <PlatformStats />}
+
+
       {restaurantsQ.isError && (
         <div className="glass rounded-xl p-6 text-sm text-destructive">
           Failed to load. <button onClick={() => restaurantsQ.refetch()} className="underline">Retry</button>
