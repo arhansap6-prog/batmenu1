@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Loader2, Store, ShieldCheck, ExternalLink } from "lucide-react";
+import { Loader2, Store, ShieldCheck, ExternalLink, Palette, Utensils } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/use-session";
+import { platformStats } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — BAT MENU" }, { name: "robots", content: "noindex" }] }),
