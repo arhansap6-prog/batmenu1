@@ -3,9 +3,10 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Plus, Store, Power, ExternalLink } from "lucide-react";
+import { Loader2, Plus, Store, Power, ExternalLink, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createRestaurantWithOwner, setRestaurantActive } from "@/lib/admin.functions";
+import { QrModal, QrView } from "@/components/QrCode";
 
 export const Route = createFileRoute("/_authenticated/admin/restaurants")({
   head: () => ({ meta: [{ title: "Restaurants — Admin" }, { name: "robots", content: "noindex" }] }),
@@ -25,6 +26,7 @@ type NewForm = {
   language: string;
   country: string;
   plan: "free" | "starter" | "basic" | "professional" | "premium" | "enterprise" | "unlimited";
+  menu_template_id: string;
   owner_full_name: string;
   owner_email: string;
   owner_mobile: string;
@@ -39,6 +41,7 @@ const emptyForm: NewForm = {
   language: "en",
   country: "",
   plan: "starter",
+  menu_template_id: "",
   owner_full_name: "",
   owner_email: "",
   owner_mobile: "",
@@ -54,6 +57,8 @@ function AdminRestaurants() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<NewForm>(emptyForm);
   const [busy, setBusy] = useState(false);
+  const [justCreated, setJustCreated] = useState<{ name: string; slug: string } | null>(null);
+  const [qrFor, setQrFor] = useState<{ name: string; slug: string } | null>(null);
 
   const listQ = useQuery({
     queryKey: ["admin-restaurants"],
@@ -67,6 +72,19 @@ function AdminRestaurants() {
     },
   });
 
+  const templatesQ = useQuery({
+    queryKey: ["templates-published"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("menu_templates")
+        .select("id, name, slug")
+        .eq("is_published", true)
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   function up<K extends keyof NewForm>(k: K, v: NewForm[K]) {
     setForm((f) => ({ ...f, [k]: v }));
   }
@@ -75,18 +93,23 @@ function AdminRestaurants() {
     e.preventDefault();
     setBusy(true);
     try {
-      const res = await createFn({ data: form });
+      const res = await createFn({
+        data: {
+          ...form,
+          menu_template_id: form.menu_template_id || null,
+        },
+      });
       toast.success(`Created ${form.restaurant_name}`);
-      setForm(emptyForm);
-      setShowForm(false);
-      qc.invalidateQueries({ queryKey: ["admin-restaurants"] });
-      // Copy owner creds to clipboard for delivery
+      setJustCreated({ name: form.restaurant_name, slug: res.slug });
       try {
         await navigator.clipboard.writeText(
           `Restaurant: ${form.restaurant_name}\nMenu: ${window.location.origin}/r/${res.slug}\nOwner email: ${form.owner_email}\nTemp password: ${form.owner_password}`,
         );
         toast.info("Credentials copied to clipboard");
       } catch {}
+      setForm(emptyForm);
+      setShowForm(false);
+      qc.invalidateQueries({ queryKey: ["admin-restaurants"] });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Create failed");
     } finally {
@@ -104,6 +127,8 @@ function AdminRestaurants() {
     }
   }
 
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+
   return (
     <div className="space-y-6">
       <div className="flex items-end justify-between gap-3">
@@ -119,6 +144,16 @@ function AdminRestaurants() {
           {showForm ? "Close" : "New restaurant"}
         </button>
       </div>
+
+      {justCreated && (
+        <div className="glass rounded-2xl p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-display text-lg font-semibold">{justCreated.name} is live</h3>
+            <button onClick={() => setJustCreated(null)} className="text-xs text-muted-foreground hover:underline">Dismiss</button>
+          </div>
+          <QrView url={`${origin}/r/${justCreated.slug}`} label={justCreated.slug} />
+        </div>
+      )}
 
       {showForm && (
         <form onSubmit={submit} className="glass grid gap-4 rounded-2xl p-6 sm:grid-cols-2">
@@ -136,6 +171,19 @@ function AdminRestaurants() {
             >
               {["free","starter","basic","professional","premium","enterprise","unlimited"].map((p) => (
                 <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Menu template</label>
+            <select
+              value={form.menu_template_id}
+              onChange={(e) => up("menu_template_id", e.target.value)}
+              className="w-full rounded-lg border border-border bg-input px-3 py-2.5 text-sm"
+            >
+              <option value="">Default (Fire Book)</option>
+              {templatesQ.data?.map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
               ))}
             </select>
           </div>
@@ -204,6 +252,12 @@ function AdminRestaurants() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setQrFor({ name: r.name, slug: r.slug })}
+                        className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1 text-xs hover:bg-accent"
+                      >
+                        <QrCode className="h-3 w-3" /> QR
+                      </button>
                       <a
                         href={`/r/${r.slug}`}
                         target="_blank"
@@ -226,6 +280,14 @@ function AdminRestaurants() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {qrFor && (
+        <QrModal
+          url={`${origin}/r/${qrFor.slug}`}
+          label={qrFor.name}
+          onClose={() => setQrFor(null)}
+        />
       )}
     </div>
   );
