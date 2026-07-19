@@ -1,11 +1,13 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { Minus, Plus, Search, ShoppingBag, Sparkles, X, Loader2, CheckCircle2 } from "lucide-react";
+import { useMemo, useState, type FormEvent, type ReactNode, type CSSProperties } from "react";
+import { Minus, Plus, Search, ShoppingBag, Sparkles, X, Loader2, CheckCircle2, Home, UtensilsCrossed, Flame } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { recommendDishes } from "@/lib/ai.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { mergeConfig, type TemplateConfig } from "@/lib/menu-template";
+import { ViewIn3DButton } from "@/components/ViewIn3D";
 
 const menuQueryOptions = (slug: string) =>
   queryOptions({
@@ -13,13 +15,13 @@ const menuQueryOptions = (slug: string) =>
     queryFn: async () => {
       const { data: r, error: rErr } = await supabase
         .from("restaurants")
-        .select("id, name, slug, category, currency, is_active, logo_url, cover_url")
+        .select("id, name, slug, category, currency, is_active, logo_url, cover_url, menu_template_id")
         .eq("slug", slug)
         .maybeSingle();
       if (rErr) throw rErr;
       if (!r || !r.is_active) throw notFound();
 
-      const [{ data: cats }, { data: items }] = await Promise.all([
+      const [{ data: cats }, { data: items }, tplRes] = await Promise.all([
         supabase
           .from("categories")
           .select("id, name, sort_order")
@@ -28,15 +30,20 @@ const menuQueryOptions = (slug: string) =>
         supabase
           .from("food_items")
           .select(
-            "id, name, description, price, discount_price, category_id, sort_order, image_url, is_veg, is_chef_recommended, is_todays_special",
+            "id, name, description, price, discount_price, category_id, sort_order, image_url, is_veg, is_chef_recommended, is_todays_special, model_3d_url, model_3d_ios_url, enable_3d",
           )
           .eq("restaurant_id", r.id)
           .eq("is_available", true)
           .order("sort_order"),
+        r.menu_template_id
+          ? supabase.from("menu_templates").select("config").eq("id", r.menu_template_id).maybeSingle()
+          : Promise.resolve({ data: null }),
       ]);
-      return { restaurant: r, categories: cats ?? [], items: items ?? [] };
+      const tpl = mergeConfig(((tplRes as { data: { config: TemplateConfig } | null }).data?.config) ?? null);
+      return { restaurant: r, categories: cats ?? [], items: items ?? [], template: tpl };
     },
   });
+
 
 export const Route = createFileRoute("/r/$slug")({
   loader: ({ params, context }) => context.queryClient.ensureQueryData(menuQueryOptions(params.slug)),
