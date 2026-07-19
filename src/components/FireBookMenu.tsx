@@ -110,7 +110,9 @@ export function FireBookMenu({
   <div className="fire-right"/>
 
   <div className="book-container">
-       
+  <div className="fire-ring">
+  <div className="flame-layer"></div>
+</div>     
         <HTMLFlipBook
           ref={bookRef}
           width={520}
