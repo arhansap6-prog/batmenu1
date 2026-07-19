@@ -194,3 +194,82 @@ scale(.9);
 }
 
 }
+/* PART 5 - REAL FIRE AURA */
+
+.fire-left,
+.fire-right{
+  position:absolute;
+  width:260px;
+  height:600px;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255,180,0,.9),
+      rgba(255,80,0,.6) 35%,
+      transparent 70%
+    );
+  filter:blur(25px);
+  opacity:.9;
+  animation:realFire 1.8s ease-in-out infinite alternate;
+  pointer-events:none;
+  z-index:2;
+}
+
+
+.fire-left{
+  left:-120px;
+}
+
+
+.fire-right{
+  right:-120px;
+}
+
+
+@keyframes realFire{
+
+from{
+  transform:scaleY(.9) scaleX(.95);
+  opacity:.7;
+}
+
+to{
+  transform:scaleY(1.15) scaleX(1.08);
+  opacity:1;
+}
+
+}
+
+
+/* FULL SCREEN BOOK */
+
+.book-container{
+  width:100vw;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:10;
+}
+
+
+.luxury-fire-book{
+  animation:bookGlow 2s infinite alternate;
+}
+
+
+@keyframes bookGlow{
+
+from{
+ filter:
+ drop-shadow(0 0 25px #ff9800)
+ drop-shadow(0 0 60px #ff4500);
+}
+
+to{
+ filter:
+ drop-shadow(0 0 50px #ffb300)
+ drop-shadow(0 0 100px #ff3300);
+}
+
+}
