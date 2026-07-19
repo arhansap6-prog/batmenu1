@@ -1,11 +1,13 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { Minus, Plus, Search, ShoppingBag, Sparkles, X, Loader2, CheckCircle2 } from "lucide-react";
+import { useMemo, useState, type FormEvent, type ReactNode, type CSSProperties } from "react";
+import { Minus, Plus, Search, ShoppingBag, Sparkles, X, Loader2, CheckCircle2, Home, UtensilsCrossed, Flame } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { recommendDishes } from "@/lib/ai.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { mergeConfig, type TemplateConfig } from "@/lib/menu-template";
+import { ViewIn3DButton } from "@/components/ViewIn3D";
 
 const menuQueryOptions = (slug: string) =>
   queryOptions({
@@ -13,13 +15,13 @@ const menuQueryOptions = (slug: string) =>
     queryFn: async () => {
       const { data: r, error: rErr } = await supabase
         .from("restaurants")
-        .select("id, name, slug, category, currency, is_active, logo_url, cover_url")
+        .select("id, name, slug, category, currency, is_active, logo_url, cover_url, menu_template_id")
         .eq("slug", slug)
         .maybeSingle();
       if (rErr) throw rErr;
       if (!r || !r.is_active) throw notFound();
 
-      const [{ data: cats }, { data: items }] = await Promise.all([
+      const [{ data: cats }, { data: items }, tplRes] = await Promise.all([
         supabase
           .from("categories")
           .select("id, name, sort_order")
@@ -28,15 +30,20 @@ const menuQueryOptions = (slug: string) =>
         supabase
           .from("food_items")
           .select(
-            "id, name, description, price, discount_price, category_id, sort_order, image_url, is_veg, is_chef_recommended, is_todays_special",
+            "id, name, description, price, discount_price, category_id, sort_order, image_url, is_veg, is_chef_recommended, is_todays_special, model_3d_url, model_3d_ios_url, enable_3d",
           )
           .eq("restaurant_id", r.id)
           .eq("is_available", true)
           .order("sort_order"),
+        r.menu_template_id
+          ? supabase.from("menu_templates").select("config").eq("id", r.menu_template_id).maybeSingle()
+          : Promise.resolve({ data: null }),
       ]);
-      return { restaurant: r, categories: cats ?? [], items: items ?? [] };
+      const tpl = mergeConfig(((tplRes as { data: { config: TemplateConfig } | null }).data?.config) ?? null);
+      return { restaurant: r, categories: cats ?? [], items: items ?? [], template: tpl };
     },
   });
+
 
 export const Route = createFileRoute("/r/$slug")({
   loader: ({ params, context }) => context.queryClient.ensureQueryData(menuQueryOptions(params.slug)),
@@ -79,7 +86,9 @@ type CartLine = { id: string; name: string; price: number; qty: number };
 function PublicMenu() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(menuQueryOptions(slug));
-  const { restaurant: r, categories, items } = data;
+  const { restaurant: r, categories, items, template } = data;
+  const [tab, setTab] = useState<"home" | "menu" | "offers">("home");
+
 
   const [q, setQ] = useState("");
   const [activeCat, setActiveCat] = useState<string>("all");
@@ -221,132 +230,134 @@ function PublicMenu() {
 
   const aiIdSet = new Set(aiResult?.picks.map((p) => p.id) ?? []);
 
-  return (
-    <div className="min-h-screen bg-background pb-32">
-      <header className="border-b border-border/60">
-        <div className="mx-auto max-w-3xl px-5 py-10 text-center">
-          {r.logo_url && (
-            <img src={r.logo_url} alt={r.name} className="mx-auto mb-4 h-14 w-14 rounded-full object-cover ring-2 ring-primary/40" />
-          )}
-          <p className="text-xs uppercase tracking-widest text-primary">{r.category || "Menu"}</p>
-          <h1 className="mt-2 font-display text-4xl font-semibold">{r.name}</h1>
-          <p className="mt-1 text-xs text-muted-foreground">Prices in {r.currency}</p>
+  const styleVars = {
+    "--tpl-bg": template.background,
+    "--tpl-surface": template.surface,
+    "--tpl-accent-from": template.accentFrom,
+    "--tpl-accent-to": template.accentTo,
+    "--tpl-price": template.priceColor,
+    "--tpl-text": template.textColor,
+    "--tpl-muted": template.mutedColor,
+    fontFamily: undefined,
+  } as CSSProperties;
+  const headingStyle: CSSProperties = { fontFamily: template.headingFont, color: template.textColor };
+  const offers = items.filter((it) => it.is_todays_special);
 
-          <button
-            onClick={() => setAiOpen(true)}
-            className="mt-5 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-xs font-medium text-primary hover:bg-primary/20"
-          >
-            <Sparkles className="h-3.5 w-3.5" /> Ask the AI concierge
-          </button>
+  return (
+    <div className="min-h-screen pb-32" style={{ ...styleVars, background: template.background, color: template.textColor }}>
+      <header className="border-b" style={{ borderColor: `${template.textColor}22` }}>
+        <div className="mx-auto max-w-3xl px-5 py-10 text-center">
+          {r.cover_url && (
+            <img src={r.cover_url} alt="" className="mx-auto mb-4 h-40 w-full max-w-xl rounded-2xl object-cover" />
+          )}
+          {r.logo_url && (
+            <img src={r.logo_url} alt={r.name} className="mx-auto mb-4 h-16 w-16 rounded-full object-cover ring-2" style={{ boxShadow: template.glow ? `0 0 40px ${template.accentFrom}` : undefined }} />
+          )}
+          <p className="text-xs uppercase tracking-widest" style={{ color: template.accentFrom }}>{r.category || "Menu"}</p>
+          <h1 className="mt-2 text-4xl font-semibold" style={headingStyle}>{r.name}</h1>
+          <p className="mt-1 text-xs" style={{ color: template.mutedColor }}>Prices in {r.currency}</p>
         </div>
+        <nav className="mx-auto flex max-w-3xl gap-2 px-5 pb-4">
+          {(["home","menu","offers"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition"
+              style={tab === t
+                ? { background: `linear-gradient(135deg, ${template.accentFrom}, ${template.accentTo})`, color: "#fff" }
+                : { background: template.surface, color: template.mutedColor }}
+            >
+              {t === "home" ? <Home className="h-3.5 w-3.5" /> : t === "menu" ? <UtensilsCrossed className="h-3.5 w-3.5" /> : <Flame className="h-3.5 w-3.5" />}
+              {t === "home" ? "Home" : t === "menu" ? "Menu" : "Offers"}
+            </button>
+          ))}
+        </nav>
       </header>
 
-      <div className="sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur">
-        <div className="mx-auto max-w-3xl px-5 py-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search dishes"
-              className="w-full rounded-full border border-border bg-input py-2 pl-9 pr-3 text-sm outline-none focus:border-primary"
-            />
-          </div>
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-            <FilterChip active={activeCat === "all"} onClick={() => setActiveCat("all")}>All</FilterChip>
-            {categories.map((c) => (
-              <FilterChip key={c.id} active={activeCat === c.id} onClick={() => setActiveCat(c.id)}>
-                {c.name}
-              </FilterChip>
-            ))}
+      {tab === "menu" && (
+        <div className="sticky top-0 z-30 border-b backdrop-blur" style={{ background: `${template.background}dd`, borderColor: `${template.textColor}22` }}>
+          <div className="mx-auto max-w-3xl px-5 py-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: template.mutedColor }} />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search dishes"
+                className="w-full rounded-full border py-2 pl-9 pr-3 text-sm outline-none"
+                style={{ background: template.surface, borderColor: `${template.textColor}22`, color: template.textColor }}
+              />
+            </div>
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+              <FilterChip active={activeCat === "all"} onClick={() => setActiveCat("all")}>All</FilterChip>
+              {categories.map((c) => (
+                <FilterChip key={c.id} active={activeCat === c.id} onClick={() => setActiveCat(c.id)}>{c.name}</FilterChip>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <main className="mx-auto max-w-3xl px-5 py-8">
-        {grouped.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground">No dishes match your search.</p>
+        {tab === "home" && (
+          <div className="space-y-6 text-center">
+            <p className="text-sm" style={{ color: template.mutedColor }}>
+              Welcome to {r.name}. Browse the full menu or tap Offers for today's specials.
+            </p>
+            <button
+              onClick={() => setAiOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white"
+              style={{ background: `linear-gradient(135deg, ${template.accentFrom}, ${template.accentTo})` }}
+            >
+              <Sparkles className="h-4 w-4" /> Ask the AI concierge
+            </button>
+            <div className="grid gap-3 pt-6 sm:grid-cols-2">
+              <button onClick={() => setTab("menu")} className="rounded-2xl border p-6 text-left" style={{ background: template.surface, borderColor: `${template.textColor}22` }}>
+                <UtensilsCrossed className="h-5 w-5" style={{ color: template.accentFrom }} />
+                <p className="mt-2 text-lg font-semibold" style={headingStyle}>Full menu</p>
+                <p className="text-xs" style={{ color: template.mutedColor }}>{items.length} dishes across {categories.length} categories</p>
+              </button>
+              <button onClick={() => setTab("offers")} className="rounded-2xl border p-6 text-left" style={{ background: template.surface, borderColor: `${template.textColor}22` }}>
+                <Flame className="h-5 w-5" style={{ color: template.accentFrom }} />
+                <p className="mt-2 text-lg font-semibold" style={headingStyle}>Today's offers</p>
+                <p className="text-xs" style={{ color: template.mutedColor }}>{offers.length} chef-selected specials</p>
+              </button>
+            </div>
+          </div>
         )}
-        <div className="space-y-10">
-          {grouped.map((g) => (
-            <section key={g.key}>
-              <h2 className="font-display text-xl font-semibold">{g.name}</h2>
-              <div className="mt-4 space-y-3">
-                {g.items.map((it) => {
-                  const price = Number(it.discount_price ?? it.price);
-                  const isAI = aiIdSet.has(it.id);
-                  return (
-                    <div
-                      key={it.id}
-                      className={`flex items-start gap-4 rounded-2xl border p-3 transition ${
-                        isAI ? "border-primary/60 bg-primary/5" : "border-border/60 bg-card"
-                      }`}
-                    >
-                      {it.image_url ? (
-                        <img src={it.image_url} alt={it.name} className="h-20 w-20 flex-none rounded-xl object-cover" />
-                      ) : (
-                        <div className="grid h-20 w-20 flex-none place-items-center rounded-xl bg-muted text-xs text-muted-foreground">
-                          {it.name.slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <p className="text-sm font-semibold">{it.name}</p>
-                          {it.is_chef_recommended && (
-                            <span className="rounded-full bg-gold/20 px-1.5 py-0.5 text-[9px] font-medium text-gold">Chef</span>
-                          )}
-                          {it.is_todays_special && (
-                            <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-medium text-primary">Today</span>
-                          )}
-                          {isAI && (
-                            <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-medium text-primary">
-                              <Sparkles className="h-2.5 w-2.5" /> Pick
-                            </span>
-                          )}
-                        </div>
-                        {it.description && (
-                          <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{it.description}</p>
-                        )}
-                        <div className="mt-2 flex items-center justify-between">
-                          <p className="text-sm font-medium text-primary">
-                            {r.currency} {price.toFixed(2)}
-                            {it.discount_price != null && (
-                              <span className="ml-2 text-[10px] text-muted-foreground line-through">
-                                {Number(it.price).toFixed(2)}
-                              </span>
-                            )}
-                          </p>
-                          {cart[it.id] ? (
-                            <div className="flex items-center gap-2 rounded-full border border-border bg-background px-1.5 py-1">
-                              <button onClick={() => bump(it.id, -1)} className="grid h-6 w-6 place-items-center rounded-full bg-muted">
-                                <Minus className="h-3 w-3" />
-                              </button>
-                              <span className="min-w-4 text-center text-xs font-semibold">{cart[it.id].qty}</span>
-                              <button onClick={() => bump(it.id, 1)} className="grid h-6 w-6 place-items-center rounded-full gradient-red text-primary-foreground">
-                                <Plus className="h-3 w-3" />
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => addToCart(it)}
-                              className="rounded-full gradient-red px-3 py-1 text-xs font-medium text-primary-foreground"
-                            >
-                              Add
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
-        </div>
-        <p className="mt-16 text-center text-[10px] uppercase tracking-widest text-muted-foreground">
+
+        {tab === "menu" && (
+          <>
+            {grouped.length === 0 && <p className="text-center text-sm" style={{ color: template.mutedColor }}>No dishes match your search.</p>}
+            <div className="space-y-10">
+              {grouped.map((g) => (
+                <section key={g.key}>
+                  <h2 className="text-xl font-semibold" style={headingStyle}>{g.name}</h2>
+                  <div className="mt-4 space-y-3">
+                    {g.items.map((it) => (
+                      <DishRow key={it.id} it={it} r={r} template={template} isAI={aiIdSet.has(it.id)} cartQty={cart[it.id]?.qty} onAdd={() => addToCart(it)} onBump={(d) => bump(it.id, d)} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          </>
+        )}
+
+        {tab === "offers" && (
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold" style={headingStyle}>Today's specials</h2>
+            {offers.length === 0 && <p className="text-sm" style={{ color: template.mutedColor }}>No specials today — check the full menu.</p>}
+            {offers.map((it) => (
+              <DishRow key={it.id} it={it} r={r} template={template} isAI={aiIdSet.has(it.id)} cartQty={cart[it.id]?.qty} onAdd={() => addToCart(it)} onBump={(d) => bump(it.id, d)} />
+            ))}
+          </div>
+        )}
+
+        <p className="mt-16 text-center text-[10px] uppercase tracking-widest" style={{ color: template.mutedColor }}>
           Powered by BAT MENU
         </p>
       </main>
+
 
       {/* Sticky cart bar */}
       {cartCount > 0 && !showCart && !placed && (

@@ -81,6 +81,7 @@ export const createRestaurantWithOwner = createServerFn({ method: "POST" })
         plan: z
           .enum(["free", "starter", "basic", "professional", "premium", "enterprise", "unlimited"])
           .default("starter"),
+        menu_template_id: z.string().uuid().optional().nullable(),
         owner_full_name: z.string().trim().min(2).max(120),
         owner_email: z.string().trim().email().max(255),
         owner_mobile: z.string().trim().max(30).optional().default(""),
@@ -151,6 +152,7 @@ export const createRestaurantWithOwner = createServerFn({ method: "POST" })
         plan: data.plan,
         owner_id: ownerId,
         created_by: context.userId,
+        menu_template_id: data.menu_template_id ?? null,
       })
       .select("id, slug")
       .single();
@@ -212,4 +214,26 @@ export const clearMustChangePassword = createServerFn({ method: "POST" })
       .eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+/** Super Admin — aggregate platform counts for the dashboard. */
+export const platformStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isSA } = await context.supabase.rpc("is_super_admin", { _user_id: context.userId });
+    if (!isSA) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [rTotal, rActive, dTotal, tPub] = await Promise.all([
+      supabaseAdmin.from("restaurants").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("restaurants").select("id", { count: "exact", head: true }).eq("is_active", true),
+      supabaseAdmin.from("food_items").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("menu_templates").select("id", { count: "exact", head: true }).eq("is_published", true),
+    ]);
+    return {
+      restaurants_total: rTotal.count ?? 0,
+      restaurants_active: rActive.count ?? 0,
+      restaurants_suspended: (rTotal.count ?? 0) - (rActive.count ?? 0),
+      dishes_total: dTotal.count ?? 0,
+      templates_published: tPub.count ?? 0,
+    };
   });

@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Loader2, Store, ShieldCheck, ExternalLink } from "lucide-react";
+import { Loader2, Store, ShieldCheck, ExternalLink, Palette, Utensils } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/use-session";
+import { platformStats } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — BAT MENU" }, { name: "robots", content: "noindex" }] }),
@@ -66,6 +68,9 @@ function Dashboard() {
           </span>
         )}
       </div>
+
+      {session.isSuperAdmin && <PlatformStats />}
+
 
       {restaurantsQ.isError && (
         <div className="glass rounded-xl p-6 text-sm text-destructive">
@@ -136,5 +141,37 @@ function Dashboard() {
         </div>
       )}
     </div>
+  );
+}
+
+function PlatformStats() {
+  const statsFn = useServerFn(platformStats);
+  const q = useQuery({
+    queryKey: ["platform-stats"],
+    queryFn: () => statsFn({}),
+  });
+  const items = [
+    { label: "Restaurants", value: q.data?.restaurants_total ?? "—", icon: Store },
+    { label: "Active", value: q.data?.restaurants_active ?? "—", icon: ShieldCheck },
+    { label: "Dishes", value: q.data?.dishes_total ?? "—", icon: Utensils },
+    { label: "Templates", value: q.data?.templates_published ?? "—", icon: Palette },
+  ];
+  return (
+    <section>
+      <div className="grid gap-3 sm:grid-cols-4">
+        {items.map((it) => (
+          <div key={it.label} className="glass rounded-2xl p-4">
+            <it.icon className="h-4 w-4 text-primary" />
+            <p className="mt-2 text-2xl font-semibold font-display">{q.isLoading ? "…" : it.value}</p>
+            <p className="text-xs text-muted-foreground">{it.label}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Link to="/admin/restaurants" className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:bg-accent">Manage restaurants</Link>
+        <Link to="/admin/menu-templates" className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:bg-accent">Menu templates</Link>
+        <Link to="/admin/intro-video" className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:bg-accent">Intro video</Link>
+      </div>
+    </section>
   );
 }

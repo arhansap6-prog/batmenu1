@@ -19,6 +19,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
 import { Route as AuthenticatedOwnerMenuRouteImport } from './routes/_authenticated/owner.menu'
 import { Route as AuthenticatedAdminRestaurantsRouteImport } from './routes/_authenticated/admin.restaurants'
+import { Route as AuthenticatedAdminMenuTemplatesRouteImport } from './routes/_authenticated/admin/menu-templates'
 import { Route as AuthenticatedAdminIntroVideoRouteImport } from './routes/_authenticated/admin.intro-video'
 
 const AuthRoute = AuthRouteImport.update({
@@ -72,6 +73,12 @@ const AuthenticatedAdminRestaurantsRoute =
     path: '/admin/restaurants',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminMenuTemplatesRoute =
+  AuthenticatedAdminMenuTemplatesRouteImport.update({
+    id: '/admin/menu-templates',
+    path: '/admin/menu-templates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminIntroVideoRoute =
   AuthenticatedAdminIntroVideoRouteImport.update({
     id: '/admin/intro-video',
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/orders': typeof AuthenticatedOrdersRoute
   '/r/$slug': typeof RSlugRoute
   '/admin/intro-video': typeof AuthenticatedAdminIntroVideoRoute
+  '/admin/menu-templates': typeof AuthenticatedAdminMenuTemplatesRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/owner/menu': typeof AuthenticatedOwnerMenuRoute
 }
@@ -100,6 +108,7 @@ export interface FileRoutesByTo {
   '/orders': typeof AuthenticatedOrdersRoute
   '/r/$slug': typeof RSlugRoute
   '/admin/intro-video': typeof AuthenticatedAdminIntroVideoRoute
+  '/admin/menu-templates': typeof AuthenticatedAdminMenuTemplatesRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/owner/menu': typeof AuthenticatedOwnerMenuRoute
 }
@@ -114,6 +123,7 @@ export interface FileRoutesById {
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/r/$slug': typeof RSlugRoute
   '/_authenticated/admin/intro-video': typeof AuthenticatedAdminIntroVideoRoute
+  '/_authenticated/admin/menu-templates': typeof AuthenticatedAdminMenuTemplatesRoute
   '/_authenticated/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/_authenticated/owner/menu': typeof AuthenticatedOwnerMenuRoute
 }
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/r/$slug'
     | '/admin/intro-video'
+    | '/admin/menu-templates'
     | '/admin/restaurants'
     | '/owner/menu'
   fileRoutesByTo: FileRoutesByTo
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/r/$slug'
     | '/admin/intro-video'
+    | '/admin/menu-templates'
     | '/admin/restaurants'
     | '/owner/menu'
   id:
@@ -153,6 +165,7 @@ export interface FileRouteTypes {
     | '/_authenticated/orders'
     | '/r/$slug'
     | '/_authenticated/admin/intro-video'
+    | '/_authenticated/admin/menu-templates'
     | '/_authenticated/admin/restaurants'
     | '/_authenticated/owner/menu'
   fileRoutesById: FileRoutesById
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRestaurantsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/menu-templates': {
+      id: '/_authenticated/admin/menu-templates'
+      path: '/admin/menu-templates'
+      fullPath: '/admin/menu-templates'
+      preLoaderRoute: typeof AuthenticatedAdminMenuTemplatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/intro-video': {
       id: '/_authenticated/admin/intro-video'
       path: '/admin/intro-video'
@@ -252,6 +272,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedAdminIntroVideoRoute: typeof AuthenticatedAdminIntroVideoRoute
+  AuthenticatedAdminMenuTemplatesRoute: typeof AuthenticatedAdminMenuTemplatesRoute
   AuthenticatedAdminRestaurantsRoute: typeof AuthenticatedAdminRestaurantsRoute
   AuthenticatedOwnerMenuRoute: typeof AuthenticatedOwnerMenuRoute
 }
@@ -261,6 +282,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedAdminIntroVideoRoute: AuthenticatedAdminIntroVideoRoute,
+  AuthenticatedAdminMenuTemplatesRoute: AuthenticatedAdminMenuTemplatesRoute,
   AuthenticatedAdminRestaurantsRoute: AuthenticatedAdminRestaurantsRoute,
   AuthenticatedOwnerMenuRoute: AuthenticatedOwnerMenuRoute,
 }
@@ -278,13 +300,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
