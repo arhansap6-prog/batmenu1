@@ -48,7 +48,7 @@ const menuQueryOptions = (slug: string) =>
   });
 
 
-export const Route = createFileRoute("/r/$slug")({
+export const Route = createFileRoute("/r/$slug/backup")({
   loader: ({ params, context }) => context.queryClient.ensureQueryData(menuQueryOptions(params.slug)),
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Menu — BAT MENU" }] };
@@ -316,9 +316,6 @@ function PublicMenu() {
     )}
     onAdd={(it) => addToCart(it as any)}
     onBump={(id, d) => bump(id, d)}
-    onBack={() => setTab("home")}
-    onOpenCart={() => setShowCart(true)}
-    cartCount={cartCount}
   />
 )}
 
