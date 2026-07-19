@@ -157,8 +157,8 @@ function OwnerMenu() {
   }
 
   async function updateItem(id: string, patch: Record<string, unknown>) {
-    const { error } = await supabase.from("food_items").update(patch).eq("id", id);
-    if (error) return toast.error(error.message);
+    const { error } = await supabase.from("food_items").update(patch as never).eq("id", id);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["items", restaurantId] });
   }
 
