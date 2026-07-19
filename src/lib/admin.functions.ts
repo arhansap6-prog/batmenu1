@@ -81,6 +81,7 @@ export const createRestaurantWithOwner = createServerFn({ method: "POST" })
         plan: z
           .enum(["free", "starter", "basic", "professional", "premium", "enterprise", "unlimited"])
           .default("starter"),
+        menu_template_id: z.string().uuid().optional().nullable(),
         owner_full_name: z.string().trim().min(2).max(120),
         owner_email: z.string().trim().email().max(255),
         owner_mobile: z.string().trim().max(30).optional().default(""),
