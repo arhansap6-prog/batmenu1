@@ -6,8 +6,12 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { recommendDishes } from "@/lib/ai.functions";
 import { useServerFn } from "@tanstack/react-start";
+
 import { mergeConfig, type TemplateConfig } from "@/lib/menu-template";
 import { ViewIn3DButton } from "@/components/ViewIn3D";
+
+import { FireBookMenu } from "@/components/FireBookMenu";
+(Integrate FireBook menu in public menu)
 
 const menuQueryOptions = (slug: string) =>
   queryOptions({
