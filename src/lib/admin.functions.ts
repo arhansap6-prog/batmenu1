@@ -152,6 +152,7 @@ export const createRestaurantWithOwner = createServerFn({ method: "POST" })
         plan: data.plan,
         owner_id: ownerId,
         created_by: context.userId,
+        menu_template_id: data.menu_template_id ?? null,
       })
       .select("id, slug")
       .single();
