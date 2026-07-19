@@ -1,15 +1,8 @@
-// NEW FILE: src/components/FireBookMenu.tsx
-//
-// A real page-flip "burning book" menu, using react-pageflip — the SAME
-// library already used in src/routes/m.$slug.tsx, so no new dependency
-// needs installing. Each restaurant looks different because everything
-// visual (colors, glow, font) comes from that restaurant's assigned
-// menu_templates.config — the same `template` object already computed in
-// r.$slug.tsx via mergeConfig().
+// src/components/FireBookMenu.tsx
 
 import { forwardRef, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import HTMLFlipBook from "react-pageflip";
-import { ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Minus, Plus, ArrowLeft } from "lucide-react";
 
 type Item = {
   id: string;
@@ -22,7 +15,13 @@ type Item = {
   is_chef_recommended: boolean;
   is_todays_special: boolean;
 };
-type Category = { id: string; name: string; sort_order: number };
+
+type Category = {
+  id: string;
+  name: string;
+  sort_order: number;
+};
+
 type Template = {
   background: string;
   surface: string;
@@ -52,6 +51,7 @@ export function FireBookMenu({
   cart,
   onAdd,
   onBump,
+  onBack,
 }: {
   restaurantName: string;
   logoUrl: string | null;
@@ -62,60 +62,103 @@ export function FireBookMenu({
   cart: Record<string, number>;
   onAdd: (it: Item) => void;
   onBump: (id: string, delta: number) => void;
+  onBack: () => void;
 }) {
   const bookRef = useRef<any>(null);
+
   const [isMobile, setIsMobile] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
-    const on = () => setIsMobile(mq.matches);
-    on();
-    mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
+
+    const check = () => setIsMobile(mq.matches);
+
+    check();
+    mq.addEventListener("change", check);
+
+    return () => mq.removeEventListener("change", check);
   }, []);
 
   const pages = useMemo<PageKind[]>(() => {
-    const out: PageKind[] = [{ kind: "cover", name: restaurantName, logoUrl }];
-    categories.forEach((c) => {
-      const catItems = items.filter((i) => i.category_id === c.id);
-      if (catItems.length === 0) return;
-      const parts = Math.max(1, Math.ceil(catItems.length / ITEMS_PER_PAGE));
-      for (let p = 0; p < parts; p++) {
+    const out: PageKind[] = [
+      {
+        kind: "cover",
+        name: restaurantName,
+        logoUrl,
+      },
+    ];
+
+    categories.forEach((category) => {
+      const categoryItems = items.filter(
+        (item) => item.category_id === category.id,
+      );
+
+      if (!categoryItems.length) return;
+
+      const totalParts = Math.ceil(
+        categoryItems.length / ITEMS_PER_PAGE,
+      );
+
+      for (let i = 0; i < totalParts; i++) {
         out.push({
           kind: "category",
-          category: c,
-          items: catItems.slice(p * ITEMS_PER_PAGE, (p + 1) * ITEMS_PER_PAGE),
-          part: p + 1,
-          totalParts: parts,
+          category,
+          items: categoryItems.slice(
+            i * ITEMS_PER_PAGE,
+            (i + 1) * ITEMS_PER_PAGE,
+          ),
+          part: i + 1,
+          totalParts,
         });
       }
     });
-    out.push({ kind: "back" });
+
+    out.push({
+      kind: "back",
+    });
+
     return out;
   }, [restaurantName, logoUrl, categories, items]);
 
   function flipPrev() {
     bookRef.current?.pageFlip()?.flipPrev();
   }
+
   function flipNext() {
     bookRef.current?.pageFlip()?.flipNext();
   }
 
   return (
-    <div className="relative flex flex-col items-center py-6">
-      {/* Flame glow bars on both sides of the book */}
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
+      style={{
+        background: template.background,
+      }}
+    >
+
+      <button
+        onClick={onBack}
+        className="absolute left-5 top-5 z-[100] flex items-center gap-2 rounded-full px-4 py-2 text-sm"
+        style={{
+          background: template.surface,
+          color: template.textColor,
+          border: `1px solid ${template.textColor}33`,
+        }}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </button>
+
       <div
-        className="pointer-events-none absolute inset-y-10 left-0 w-16 sm:w-28 blur-2xl"
-        style={{ background: `linear-gradient(90deg, ${template.accentFrom}55, transparent)` }}
-      />
-      <div
-        className="pointer-events-none absolute inset-y-10 right-0 w-16 sm:w-28 blur-2xl"
-        style={{ background: `linear-gradient(270deg, ${template.accentTo}55, transparent)` }}
+        className="pointer-events-none absolute inset-0 opacity-40 blur-3xl"
+        style={{
+          background:
+            `radial-gradient(circle, ${template.accentFrom}55, transparent 60%)`,
+        }}
       />
 
-      <div className="relative">
-        <HTMLFlipBook
+      <div className="relative">        <HTMLFlipBook
           ref={bookRef}
           width={isMobile ? 300 : 420}
           height={isMobile ? 460 : 580}
@@ -142,70 +185,127 @@ export function FireBookMenu({
           disableFlipByClick={false}
           onFlip={(e: any) => setCurrentPage(e.data)}
         >
-          {pages.map((p, idx) => (
-            <BookPage key={idx} template={template}>
-              {renderPage(p, { currency, template, cart, onAdd, onBump })}
+          {pages.map((page, index) => (
+            <BookPage
+              key={index}
+              template={template}
+            >
+              {renderPage(page, {
+                currency,
+                template,
+                cart,
+                onAdd,
+                onBump,
+              })}
             </BookPage>
           ))}
         </HTMLFlipBook>
       </div>
 
-      <div className="mt-5 flex items-center gap-4">
+      <div className="mt-6 flex items-center gap-4">
         <button
           onClick={flipPrev}
           disabled={currentPage === 0}
-          className="flex h-10 w-10 items-center justify-center rounded-full border transition disabled:opacity-30"
-          style={{ borderColor: `${template.textColor}33`, background: template.surface, color: template.textColor }}
-          aria-label="Previous page"
+          className="flex h-10 w-10 items-center justify-center rounded-full border disabled:opacity-30"
+          style={{
+            background: template.surface,
+            color: template.textColor,
+            borderColor: `${template.textColor}33`,
+          }}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
         </button>
-        <div className="text-[11px] uppercase tracking-widest tabular-nums" style={{ color: template.mutedColor }}>
-          {String(currentPage + 1).padStart(2, "0")} / {String(pages.length).padStart(2, "0")}
-        </div>
+
+        <span
+          className="text-xs tracking-widest"
+          style={{
+            color: template.mutedColor,
+          }}
+        >
+          {currentPage + 1} / {pages.length}
+        </span>
+
         <button
           onClick={flipNext}
           disabled={currentPage >= pages.length - 1}
-          className="flex h-10 w-10 items-center justify-center rounded-full border transition disabled:opacity-30"
-          style={{ borderColor: `${template.textColor}33`, background: template.surface, color: template.textColor }}
-          aria-label="Next page"
+          className="flex h-10 w-10 items-center justify-center rounded-full border disabled:opacity-30"
+          style={{
+            background: template.surface,
+            color: template.textColor,
+            borderColor: `${template.textColor}33`,
+          }}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-5 w-5" />
         </button>
       </div>
-      <p className="mt-2 text-[10px] uppercase tracking-widest" style={{ color: template.mutedColor }}>
-        Tap the right edge, or swipe, to turn the page
+
+      <p
+        className="mt-3 text-[10px] uppercase tracking-widest"
+        style={{
+          color: template.mutedColor,
+        }}
+      >
+        Swipe or tap the edge to turn pages
       </p>
+
     </div>
   );
 }
 
-const BookPage = forwardRef<HTMLDivElement, { template: Template; children: React.ReactNode }>(
-  function BookPage({ template, children }, ref) {
-    const style: CSSProperties = {
-      background: template.background,
-      color: template.textColor,
-      boxShadow: template.glow ? `inset 0 0 60px ${template.accentFrom}33` : undefined,
-    };
-    return (
-      <div ref={ref} className="relative h-full w-full overflow-hidden" style={style} data-density="hard">
-        {/* Charred edge glow, inner fold shadow */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-60"
-          style={{
-            background: `radial-gradient(120% 60% at 50% 0%, ${template.accentFrom}22, transparent 60%)`,
-          }}
-        />
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-5 bg-gradient-to-r from-black/40 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-5 bg-gradient-to-l from-black/40 to-transparent" />
-        <div className="relative h-full w-full">{children}</div>
+
+const BookPage = forwardRef<
+  HTMLDivElement,
+  {
+    template: Template;
+    children: React.ReactNode;
+  }
+>(function BookPage(
+  { template, children },
+  ref,
+) {
+  const style: CSSProperties = {
+    background: template.background,
+    color: template.textColor,
+    boxShadow: template.glow
+      ? `inset 0 0 70px ${template.accentFrom}33`
+      : undefined,
+  };
+
+  return (
+    <div
+      ref={ref}
+      className="relative h-full w-full overflow-hidden"
+      style={style}
+      data-density="hard"
+    >
+
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            `radial-gradient(circle at top, ${template.accentFrom}33, transparent 60%)`,
+        }}
+      />
+
+      <div
+        className="pointer-events-none absolute left-0 top-0 h-full w-6"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(0,0,0,.5), transparent)",
+        }}
+      />
+
+      <div className="relative h-full w-full">
+        {children}
       </div>
-    );
-  },
-);
+
+    </div>
+  );
+});
+
 
 function renderPage(
-  p: PageKind,
+  page: PageKind,
   ctx: {
     currency: string;
     template: Template;
@@ -214,46 +314,124 @@ function renderPage(
     onBump: (id: string, delta: number) => void;
   },
 ) {
-  if (p.kind === "cover") return <CoverPage name={p.name} logoUrl={p.logoUrl} template={ctx.template} />;
-  if (p.kind === "back") return <BackPage template={ctx.template} />;
-  return <CategoryBookPage {...p} {...ctx} />;
-}
+  if (page.kind === "cover") {
+    return (
+      <CoverPage
+        name={page.name}
+        logoUrl={page.logoUrl}
+        template={ctx.template}
+      />
+    );
+  }
 
-function CoverPage({ name, logoUrl, template }: { name: string; logoUrl: string | null; template: Template }) {
+  if (page.kind === "back") {
+    return (
+      <BackPage template={ctx.template} />
+    );
+  }
+
+  return (
+    <CategoryBookPage
+      {...page}
+      {...ctx}
+    />
+  );
+                             }function CoverPage({
+  name,
+  logoUrl,
+  template,
+}: {
+  name: string;
+  logoUrl: string | null;
+  template: Template;
+}) {
   return (
     <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+
       {logoUrl && (
         <img
           src={logoUrl}
           alt={name}
-          className="mb-6 h-20 w-20 rounded-full object-cover"
-          style={{ boxShadow: template.glow ? `0 0 40px ${template.accentFrom}` : undefined }}
+          className="mb-6 h-24 w-24 rounded-full object-cover"
+          style={{
+            boxShadow: template.glow
+              ? `0 0 50px ${template.accentFrom}`
+              : undefined,
+          }}
         />
       )}
-      <p className="text-[10px] uppercase tracking-[0.4em]" style={{ color: template.accentFrom }}>Menu</p>
-      <h1 className="mt-4 text-4xl font-semibold" style={{ fontFamily: template.headingFont, color: template.textColor }}>
+
+      <p
+        className="text-xs uppercase tracking-[0.5em]"
+        style={{
+          color: template.accentFrom,
+        }}
+      >
+        Menu
+      </p>
+
+      <h1
+        className="mt-5 text-4xl font-bold"
+        style={{
+          color: template.textColor,
+          fontFamily: template.headingFont,
+        }}
+      >
         {name}
       </h1>
-      <div className="mt-6 h-px w-16" style={{ background: `${template.textColor}33` }} />
-      <p className="mt-4 text-[10px] uppercase tracking-[0.3em]" style={{ color: template.mutedColor }}>
+
+      <div
+        className="mt-6 h-px w-20"
+        style={{
+          background: template.accentFrom,
+        }}
+      />
+
+      <p
+        className="mt-5 text-[10px] uppercase tracking-widest"
+        style={{
+          color: template.mutedColor,
+        }}
+      >
         Powered by BAT MENU
       </p>
+
     </div>
   );
 }
 
-function BackPage({ template }: { template: Template }) {
+
+function BackPage({
+  template,
+}: {
+  template: Template;
+}) {
   return (
     <div className="flex h-full flex-col items-center justify-center p-10 text-center">
-      <p className="text-2xl" style={{ fontFamily: template.headingFont, color: template.accentFrom }}>
-        Thank you
+
+      <h2
+        className="text-3xl font-bold"
+        style={{
+          color: template.accentFrom,
+          fontFamily: template.headingFont,
+        }}
+      >
+        Thank You
+      </h2>
+
+      <p
+        className="mt-4 text-sm"
+        style={{
+          color: template.mutedColor,
+        }}
+      >
+        We hope you enjoyed our menu.
       </p>
-      <p className="mt-2 max-w-[24ch] text-sm" style={{ color: template.mutedColor }}>
-        We hope you enjoyed browsing our menu.
-      </p>
+
     </div>
   );
 }
+
 
 function CategoryBookPage({
   category,
@@ -276,87 +454,183 @@ function CategoryBookPage({
   onAdd: (it: Item) => void;
   onBump: (id: string, delta: number) => void;
 }) {
+
   return (
-    <div className="flex h-full flex-col p-5 sm:p-7">
-      <header className="mb-4 text-center">
-        <p className="text-[10px] uppercase tracking-[0.3em]" style={{ color: template.accentFrom }}>Category</p>
-        <h2 className="mt-1 text-2xl sm:text-3xl" style={{ fontFamily: template.headingFont, color: template.textColor }}>
+    <div className="flex h-full flex-col p-6">
+
+      <div className="mb-5 text-center">
+
+        <p
+          className="text-[10px] uppercase tracking-widest"
+          style={{
+            color: template.accentFrom,
+          }}
+        >
+          Category
+        </p>
+
+        <h2
+          className="mt-2 text-3xl font-bold"
+          style={{
+            color: template.textColor,
+            fontFamily: template.headingFont,
+          }}
+        >
           {category.name}
         </h2>
-        <div className="mx-auto mt-2 h-px w-12" style={{ background: `${template.textColor}33` }} />
+
         {totalParts > 1 && (
-          <p className="mt-1 text-[9px] uppercase tracking-widest" style={{ color: template.mutedColor }}>
-            Part {part} of {totalParts}
+          <p
+            className="mt-1 text-xs"
+            style={{
+              color: template.mutedColor,
+            }}
+          >
+            Page {part} of {totalParts}
           </p>
         )}
-      </header>
 
-      <ul className="flex-1 space-y-3 overflow-hidden">
-        {items.map((it) => {
-          const price = Number(it.discount_price ?? it.price);
-          const qty = cart[it.id];
+      </div>
+
+
+      <div className="space-y-4 overflow-hidden">
+
+        {items.map((item) => {
+
+          const price = Number(
+            item.discount_price ?? item.price
+          );
+
+          const qty = cart[item.id] || 0;
+
           return (
-            <li key={it.id} className="border-b border-dashed pb-2 last:border-0" style={{ borderColor: `${template.textColor}22` }}>
-              <div className="flex items-baseline gap-2">
-                <h3 className="text-base font-medium" style={{ fontFamily: template.headingFont, color: template.textColor }}>
-                  {it.name}
+            <div
+              key={item.id}
+              className="border-b pb-3"
+              style={{
+                borderColor: `${template.textColor}22`,
+              }}
+            >
+
+              <div className="flex items-center gap-2">
+
+                <h3
+                  className="text-base font-semibold"
+                  style={{
+                    color: template.textColor,
+                  }}
+                >
+                  {item.name}
                 </h3>
-                <div className="flex-1 translate-y-[-3px] border-b border-dotted" style={{ borderColor: `${template.textColor}33` }} />
-                <div className="whitespace-nowrap text-base font-semibold tabular-nums" style={{ color: template.priceColor }}>
+
+
+                <div className="flex-1 border-b border-dotted" />
+
+
+                <span
+                  className="font-bold"
+                  style={{
+                    color: template.priceColor,
+                  }}
+                >
                   {currency} {price.toFixed(2)}
-                </div>
+                </span>
+
               </div>
-              {it.description && (
-                <p className="mt-0.5 line-clamp-1 text-[11px]" style={{ color: template.mutedColor }}>{it.description}</p>
+
+
+              {item.description && (
+                <p
+                  className="mt-1 text-xs"
+                  style={{
+                    color: template.mutedColor,
+                  }}
+                >
+                  {item.description}
+                </p>
               )}
-              <div className="mt-1.5 flex items-center justify-between">
-                <div className="flex flex-wrap gap-1">
-                  {it.is_chef_recommended && <MiniBadge label="Chef" template={template} />}
-                  {it.is_todays_special && <MiniBadge label="Today" template={template} accent />}
+
+
+              <div className="mt-2 flex justify-between">
+
+                <div>
+                  {item.is_chef_recommended && (
+                    <MiniBadge
+                      label="Chef"
+                      template={template}
+                    />
+                  )}
                 </div>
-                {qty ? (
-                  <div className="flex items-center gap-1.5 rounded-full border px-1 py-0.5" style={{ borderColor: `${template.textColor}33` }}>
-                    <button onClick={() => onBump(it.id, -1)} className="grid h-5 w-5 place-items-center rounded-full" style={{ background: `${template.textColor}11`, color: template.textColor }}>
-                      <Minus className="h-2.5 w-2.5" />
+
+
+                {qty > 0 ? (
+
+                  <div className="flex items-center gap-2">
+
+                    <button
+                      onClick={() => onBump(item.id,-1)}
+                    >
+                      <Minus size={14}/>
                     </button>
-                    <span className="min-w-3 text-center text-[10px] font-semibold" style={{ color: template.textColor }}>{qty}</span>
-                    <button onClick={() => onBump(it.id, 1)} className="grid h-5 w-5 place-items-center rounded-full text-white" style={{ background: `linear-gradient(135deg, ${template.accentFrom}, ${template.accentTo})` }}>
-                      <Plus className="h-2.5 w-2.5" />
+
+                    <span>{qty}</span>
+
+                    <button
+                      onClick={() => onBump(item.id,1)}
+                    >
+                      <Plus size={14}/>
                     </button>
+
                   </div>
+
                 ) : (
+
                   <button
-                    onClick={() => onAdd(it)}
-                    className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white"
-                    style={{ background: `linear-gradient(135deg, ${template.accentFrom}, ${template.accentTo})` }}
+                    onClick={() => onAdd(item)}
+                    className="rounded-full px-3 py-1 text-xs text-white"
+                    style={{
+                      background:
+                        `linear-gradient(135deg,${template.accentFrom},${template.accentTo})`,
+                    }}
                   >
                     Add
                   </button>
+
                 )}
+
               </div>
-            </li>
+
+            </div>
           );
+
         })}
-        {items.length === 0 && (
-          <li className="pt-10 text-center text-xs" style={{ color: template.mutedColor }}>No items yet.</li>
-        )}
-      </ul>
+
+      </div>
+
     </div>
   );
 }
 
-function MiniBadge({ label, template, accent }: { label: string; template: Template; accent?: boolean }) {
+
+
+function MiniBadge({
+  label,
+  template,
+}: {
+  label:string;
+  template:Template;
+}) {
+
   return (
     <span
-      className="rounded-full border px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wider"
-      style={
-        accent
-          ? { borderColor: template.accentFrom, color: template.accentFrom }
-          : { borderColor: `${template.textColor}33`, color: template.mutedColor }
-      }
+      className="rounded-full border px-2 py-1 text-[9px]"
+      style={{
+        color:template.accentFrom,
+        borderColor:template.accentFrom,
+      }}
     >
       {label}
     </span>
   );
-}
 
+      }
