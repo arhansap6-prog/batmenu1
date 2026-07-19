@@ -86,7 +86,9 @@ type CartLine = { id: string; name: string; price: number; qty: number };
 function PublicMenu() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(menuQueryOptions(slug));
-  const { restaurant: r, categories, items } = data;
+  const { restaurant: r, categories, items, template } = data;
+  const [tab, setTab] = useState<"home" | "menu" | "offers">("home");
+
 
   const [q, setQ] = useState("");
   const [activeCat, setActiveCat] = useState<string>("all");
