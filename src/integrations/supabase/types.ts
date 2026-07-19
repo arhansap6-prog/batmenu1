@@ -120,6 +120,7 @@ export type Database = {
           created_at: string
           description: string | null
           discount_price: number | null
+          enable_3d: boolean
           id: string
           image_url: string | null
           ingredients: string | null
@@ -127,6 +128,8 @@ export type Database = {
           is_chef_recommended: boolean
           is_todays_special: boolean
           is_veg: boolean
+          model_3d_ios_url: string | null
+          model_3d_url: string | null
           name: string
           prep_time_minutes: number | null
           price: number
@@ -141,6 +144,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           discount_price?: number | null
+          enable_3d?: boolean
           id?: string
           image_url?: string | null
           ingredients?: string | null
@@ -148,6 +152,8 @@ export type Database = {
           is_chef_recommended?: boolean
           is_todays_special?: boolean
           is_veg?: boolean
+          model_3d_ios_url?: string | null
+          model_3d_url?: string | null
           name: string
           prep_time_minutes?: number | null
           price?: number
@@ -162,6 +168,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           discount_price?: number | null
+          enable_3d?: boolean
           id?: string
           image_url?: string | null
           ingredients?: string | null
@@ -169,6 +176,8 @@ export type Database = {
           is_chef_recommended?: boolean
           is_todays_special?: boolean
           is_veg?: boolean
+          model_3d_ios_url?: string | null
+          model_3d_url?: string | null
           name?: string
           prep_time_minutes?: number | null
           price?: number
@@ -192,6 +201,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      menu_templates: {
+        Row: {
+          config: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       order_items: {
         Row: {
@@ -335,6 +377,7 @@ export type Database = {
           language: string
           logo_url: string | null
           menu_intro_video_url: string | null
+          menu_template_id: string | null
           name: string
           owner_id: string | null
           plan: Database["public"]["Enums"]["subscription_plan"]
@@ -355,6 +398,7 @@ export type Database = {
           language?: string
           logo_url?: string | null
           menu_intro_video_url?: string | null
+          menu_template_id?: string | null
           name: string
           owner_id?: string | null
           plan?: Database["public"]["Enums"]["subscription_plan"]
@@ -375,6 +419,7 @@ export type Database = {
           language?: string
           logo_url?: string | null
           menu_intro_video_url?: string | null
+          menu_template_id?: string | null
           name?: string
           owner_id?: string | null
           plan?: Database["public"]["Enums"]["subscription_plan"]
@@ -382,7 +427,15 @@ export type Database = {
           theme?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "restaurants_menu_template_id_fkey"
+            columns: ["menu_template_id"]
+            isOneToOne: false
+            referencedRelation: "menu_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
