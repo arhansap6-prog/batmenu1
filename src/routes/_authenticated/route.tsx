@@ -80,6 +80,17 @@ function AuthLayout() {
 
             {session.isSuperAdmin && (
               <Link
+                to="/admin/menu-templates"
+                className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                activeProps={{ className: "text-foreground bg-accent" }}
+              >
+                <Palette className="h-4 w-4" />
+                <span className="hidden sm:inline">Templates</span>
+              </Link>
+            )}
+
+            {session.isSuperAdmin && (
+              <Link
                 to="/admin/intro-video"
                 className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
                 activeProps={{ className: "text-foreground bg-accent" }}
