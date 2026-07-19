@@ -330,3 +330,71 @@ to{
 }
 
 }
+/* PART 7 - REAL YELLOW ORANGE FLAMES */
+
+.real-flames{
+  position:absolute;
+  inset:-80px;
+  pointer-events:none;
+  z-index:8;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  gap:12px;
+}
+
+
+.real-flames span{
+  display:block;
+  width:35px;
+  height:140px;
+
+  background:
+    linear-gradient(
+      to top,
+      #ff3300,
+      #ff9800 45%,
+      #fff176
+    );
+
+  border-radius:
+    50% 50% 20% 20%;
+
+  filter:
+    blur(4px)
+    drop-shadow(0 0 15px #ff6600);
+
+  animation:
+    realFlame 0.8s ease-in-out infinite alternate;
+}
+
+
+.real-flames span:nth-child(even){
+  height:190px;
+  animation-delay:.2s;
+}
+
+
+.real-flames span:nth-child(3n){
+  height:110px;
+  animation-delay:.4s;
+}
+
+
+@keyframes realFlame{
+
+from{
+  transform:
+    scaleY(.8)
+    rotate(-5deg);
+  opacity:.7;
+}
+
+to{
+  transform:
+    scaleY(1.15)
+    rotate(5deg);
+  opacity:1;
+}
+
+}

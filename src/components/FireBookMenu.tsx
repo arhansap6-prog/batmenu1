@@ -106,13 +106,13 @@ export function FireBookMenu({
     ))}
   </div>
 
-  <div className="fire-left"/>
-  <div className="fire-right"/>
-
   <div className="book-container">
-  <div className="fire-ring">
-  <div className="flame-layer"></div>
-</div>     
+
+  <div className="real-flames">
+    {Array.from({length:12}).map((_,i)=>(
+      <span key={i}></span>
+    ))}
+  </div>
         <HTMLFlipBook
           ref={bookRef}
           width={520}
