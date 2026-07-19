@@ -42,7 +42,9 @@ type Props = {
   onAdd: (item: Item) => void;
   onBump: (id:string, delta:number)=>void;
   onBack?:()=>void;
-};
+  
+ };
+
 
 
 const ITEMS_PER_PAGE = 6;
