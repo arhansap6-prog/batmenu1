@@ -10,7 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { mergeConfig, type TemplateConfig } from "@/lib/menu-template";
 import { ViewIn3DButton } from "@/components/ViewIn3D";
 
-import BurningBook3D from "@/components/BurningBook3D";
+
 
 const menuQueryOptions = (slug: string) =>
   queryOptions({
