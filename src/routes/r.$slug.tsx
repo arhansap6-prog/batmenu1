@@ -12,6 +12,11 @@ import { ViewIn3DButton } from "@/components/ViewIn3D";
 
 
 
+
+import BurningBook3D from "@/components/BurningBook3D";
+import { FireBookMenu } from "@/components/FireBookMenu";
+ (restore customer fire book menu)
+
 const menuQueryOptions = (slug: string) =>
   queryOptions({
     queryKey: ["public-menu", slug],
@@ -303,6 +308,7 @@ function PublicMenu() {
       <main className="mx-auto max-w-3xl px-5 py-8">
 
   {tab === "menu" && (
+<<<<<<< HEAD
     <div className="space-y-8">
       {grouped.length === 0 && (
         <p className="text-sm" style={{ color: template.mutedColor }}>No dishes match your search.</p>
@@ -321,6 +327,22 @@ function PublicMenu() {
   )}
 
 
+=======
+  <FireBookMenu
+    restaurantName={r.name}
+    logoUrl={r.logo_url}
+    currency={r.currency}
+    categories={categories}
+    items={items}
+    template={template}
+    cart={Object.fromEntries(
+      Object.entries(cart).map(([id, l]) => [id, l.qty])
+    )}
+    onAdd={(it) => addToCart(it as any)}
+    onBump={(id, d) => bump(id, d)}
+  />
+)}
+>>>>>>> 61fba43 (restore customer fire book menu)
     
   
 
