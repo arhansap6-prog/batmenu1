@@ -15,7 +15,6 @@ import { ViewIn3DButton } from "@/components/ViewIn3D";
 
 import BurningBook3D from "@/components/BurningBook3D";
 import { FireBookMenu } from "@/components/FireBookMenu";
- (restore customer fire book menu)
 
 const menuQueryOptions = (slug: string) =>
   queryOptions({
@@ -320,6 +319,9 @@ function PublicMenu() {
     )}
     onAdd={(it) => addToCart(it as any)}
     onBump={(id, d) => bump(id, d)}
+    onBack={() => setTab("home")}
+    onOpenCart={() => setShowCart(true)}
+    cartCount={cartCount}
   />
 )}
 
