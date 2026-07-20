@@ -308,26 +308,6 @@ function PublicMenu() {
       <main className="mx-auto max-w-3xl px-5 py-8">
 
   {tab === "menu" && (
-<<<<<<< HEAD
-    <div className="space-y-8">
-      {grouped.length === 0 && (
-        <p className="text-sm" style={{ color: template.mutedColor }}>No dishes match your search.</p>
-      )}
-      {grouped.map((g) => (
-        <section key={g.key} className="space-y-3">
-          <h2 className="text-xl font-semibold" style={headingStyle}>{g.name}</h2>
-          <div className="space-y-3">
-            {g.items.map((it) => (
-              <DishRow key={it.id} it={it} r={r} template={template} isAI={aiIdSet.has(it.id)} cartQty={cart[it.id]?.qty} onAdd={() => addToCart(it)} onBump={(d) => bump(it.id, d)} />
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
-  )}
-
-
-=======
   <FireBookMenu
     restaurantName={r.name}
     logoUrl={r.logo_url}
@@ -342,9 +322,6 @@ function PublicMenu() {
     onBump={(id, d) => bump(id, d)}
   />
 )}
->>>>>>> 61fba43 (restore customer fire book menu)
-    
-  
 
         {tab === "offers" && (
           <div className="space-y-3">
