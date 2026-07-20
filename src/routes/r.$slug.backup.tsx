@@ -13,7 +13,7 @@ import { ViewIn3DButton } from "@/components/ViewIn3D";
 
 
 
-import BurningBook3D from "@/components/BurningBook3D.v2";
+import BurningBook3D from "@/components/BurningBook3D";
 import { FireBookMenu } from "@/components/FireBookMenu";
 
 const menuQueryOptions = (slug: string) =>
@@ -52,7 +52,7 @@ const menuQueryOptions = (slug: string) =>
   });
 
 
-export const Route = createFileRoute("/r/$slug")({
+export const Route = createFileRoute("/r/$slug/backup")({
   loader: ({ params, context }) => context.queryClient.ensureQueryData(menuQueryOptions(params.slug)),
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Menu — BAT MENU" }] };

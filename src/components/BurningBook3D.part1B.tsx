@@ -73,63 +73,6 @@ function FireGlow() {
     />
   );
 }
-function FireAura() {
-  const aura = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (!aura.current) return;
-
-    const scale =
-      1 + Math.sin(state.clock.elapsedTime * 3) * 0.04;
-
-    aura.current.scale.set(
-      scale,
-      scale,
-      scale
-    );
-  });
-
-  return (
-    <mesh ref={aura} position={[0, 0.3, 0]}>
-      <sphereGeometry args={[3.8, 32, 32]} />
-
-      <meshBasicMaterial
-        color="#ff3300"
-        transparent
-        opacity={0.08}
-        side={THREE.BackSide}
-      />
-    </mesh>
-  );
-}
-function SmokeLayer() {
-  const smoke = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (!smoke.current) return;
-
-    smoke.current.rotation.y =
-      state.clock.elapsedTime * 0.05;
-  });
-
-  return (
-    <mesh
-      ref={smoke}
-      position={[0, 2, 0]}
-    >
-      <sphereGeometry
-        args={[4.5, 32, 32]}
-      />
-
-      <meshBasicMaterial
-        color="#555555"
-        transparent
-        opacity={0.025}
-        side={THREE.BackSide}
-      />
-    </mesh>
-  );
-}
 function OpenBookModel() {
   const bookRef = useRef<THREE.Group>(null);
 
@@ -145,8 +88,7 @@ function OpenBookModel() {
 
   return (
     <group ref={bookRef} rotation={[0.15, -0.25, 0]}>
-              <FireAura />
-              <SmokeLayer />
+
       {/* LEFT COVER */}
       <mesh position={[-1.55,0,0]}>
         <boxGeometry args={[3,0.18,4]} />
