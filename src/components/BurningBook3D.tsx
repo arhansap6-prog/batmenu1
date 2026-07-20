@@ -1,75 +1,81 @@
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Environment } from "@react-three/drei";
+import * as THREE from "three";
+import FireEffect from "./burning-book/FireEffect";
+import Navigation from "./burning-book/Navigation";
+import { Dish } from "./burning-book/types";
 
-function Book(){
+interface BurningBook3DProps {
+  items: Dish[];
+}
+
+function BurningBookModel() {
   return (
-    <group rotation={[0.15,0,0]}>
-
-      {/* LEFT PAGE */}
-      <mesh position={[-1.15,0,0]}>
-        <boxGeometry args={[2.3,0.12,3]} />
+    <group rotation={[0.15, -0.25, 0]}>
+      <mesh>
+        <boxGeometry args={[3.2, 0.35, 4]} />
         <meshStandardMaterial
-          color="#fff8e7"
-          roughness={1}
-        />
-      </mesh>
-
-
-      {/* RIGHT PAGE */}
-      <mesh position={[1.15,0,0]}>
-        <boxGeometry args={[2.3,0.12,3]} />
-        <meshStandardMaterial
-          color="#fff8e7"
-          roughness={1}
-        />
-      </mesh>
-
-
-      {/* CENTER SPINE */}
-      <mesh position={[0,-0.1,0]}>
-        <boxGeometry args={[0.25,0.25,3.2]} />
-        <meshStandardMaterial
-          color="#5b2b10"
-        />
-      </mesh>
-
-
-      {/* BOTTOM COVER */}
-      <mesh position={[0,-0.25,0]}>
-        <boxGeometry args={[3,0.18,3.4]} />
-        <meshStandardMaterial
-          color="#2b1205"
+          color="#160803"
           roughness={0.8}
         />
       </mesh>
 
+      <mesh position={[0, 0.25, 0]}>
+        <boxGeometry args={[3, 0.25, 3.8]} />
+        <meshStandardMaterial
+          color="#f5e6c8"
+          roughness={1}
+        />
+      </mesh>
     </group>
   );
 }
 
+export default function BurningBook3D({
+  items,
+}: BurningBook3DProps) {
+  return (
+    <div className="w-full h-[700px] bg-black rounded-3xl overflow-hidden relative">
 
-export default function BurningBook3D(){
+      <Canvas
+        camera={{
+          position: [0, 3, 7],
+          fov: 45,
+        }}
+      >
 
-return(
-<div className="fixed inset-0 bg-black">
+        <ambientLight intensity={0.7} />
 
-<Canvas camera={{position:[0,2,8]}}>
+        <pointLight
+          position={[0, 3, 2]}
+          intensity={5}
+          color={new THREE.Color("#ff5500")}
+        />
 
-<ambientLight intensity={0.8}/>
+        <BurningBookModel />
 
-<pointLight
- position={[0,2,3]}
- color="#ff8a00"
- intensity={8}
-/>
+        <FireEffect />
 
-<Book/>
+        <Environment preset="night" />
 
-<OrbitControls/>
+        <OrbitControls
+          enablePan={false}
+          autoRotate
+          autoRotateSpeed={0.6}
+        />
 
-</Canvas>
+      </Canvas>
 
-</div>
-);
 
+      <div className="absolute inset-0 pointer-events-none">
+        <Navigation
+          items={items}
+          onHome={() => {
+            window.location.href = "/";
+          }}
+        />
+      </div>
+
+    </div>
+  );
 }

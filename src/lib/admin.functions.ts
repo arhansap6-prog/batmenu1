@@ -7,7 +7,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  * Refuses if a super_admin already exists. This endpoint self-locks after first use.
  */
 export const bootstrapSuperAdmin = createServerFn({ method: "POST" })
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         email: z.string().trim().email().max(255),
@@ -70,7 +70,7 @@ const slugify = (s: string) =>
  */
 export const createRestaurantWithOwner = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         restaurant_name: z.string().trim().min(2).max(120),
@@ -185,7 +185,7 @@ export const createRestaurantWithOwner = createServerFn({ method: "POST" })
 /** Super Admin toggles restaurant active/suspended. */
 export const setRestaurantActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw) => z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(raw))
+  .validator((raw) => z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(raw))
   .handler(async ({ data, context }) => {
     const { data: isSA } = await context.supabase.rpc("is_super_admin", { _user_id: context.userId });
     if (!isSA) throw new Error("Forbidden");

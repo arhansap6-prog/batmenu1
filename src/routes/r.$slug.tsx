@@ -10,7 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { mergeConfig, type TemplateConfig } from "@/lib/menu-template";
 import { ViewIn3DButton } from "@/components/ViewIn3D";
 
-import { FireBookMenu } from "@/components/FireBookMenu";
+import BurningBook3D from "@/components/BurningBook3D";
 
 const menuQueryOptions = (slug: string) =>
   queryOptions({
@@ -302,25 +302,13 @@ function PublicMenu() {
 
       <main className="mx-auto max-w-3xl px-5 py-8">
 
-       
-       {tab === "menu" && (
-  <FireBookMenu
-    restaurantName={r.name}
-    logoUrl={r.logo_url}
-    currency={r.currency}
-    categories={categories}
-    items={items}
-    template={template}
-    cart={Object.fromEntries(
-      Object.entries(cart).map(([id, l]) => [id, l.qty])
-    )}
-    onAdd={(it) => addToCart(it as any)}
-    onBump={(id, d) => bump(id, d)}
-    onBack={() => setTab("home")}
-    onOpenCart={() => setShowCart(true)}
-    cartCount={cartCount}
-  />
+  {tab === "menu" && (
+  <div className="relative w-full min-h-[700px] overflow-hidden rounded-3xl">
+    <BurningBook3D />
+  </div>
 )}
+    
+  
 
         {tab === "offers" && (
           <div className="space-y-3">
