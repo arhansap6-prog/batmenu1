@@ -245,7 +245,7 @@ export function FireBookMenu({
               useMouseEvents={true}
               swipeDistance={30}
               showPageCorners={true}
-              disableFlipByClick={false}
+              disableFlipByClick={true}
               onFlip={(e: any) => setCurrentPage(e.data)}
             >
               {pages.map((p, idx) => (
