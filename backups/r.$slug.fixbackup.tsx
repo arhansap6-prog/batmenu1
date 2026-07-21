@@ -307,6 +307,38 @@ function PublicMenu() {
           ))}
         </nav>
       </header>
+
+      {tab === "home" && (
+        <div className="sticky top-0 z-30 border-b backdrop-blur" style={{ background: `${template.background}dd`, borderColor: `${template.textColor}22` }}>
+          <div className="mx-auto max-w-3xl px-5 py-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: template.mutedColor }} />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search dishes"
+                className="w-full rounded-full border py-2 pl-9 pr-3 text-sm outline-none"
+                style={{ background: template.surface, borderColor: `${template.textColor}22`, color: template.textColor }}
+              />
+            </div>
+            <nav className="mx-auto flex max-w-3xl gap-2 px-5 pb-4">
+              {(["home","menu","offers"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTab(t)}
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition"
+                  style={tab === t
+                    ? { background: `linear-gradient(135deg, ${template.accentFrom}, ${template.accentTo})`, color: "#fff" }
+                    : { background: template.surface, color: template.mutedColor }}
+                >
+                  {t === "home" ? <Home className="h-3.5 w-3.5" /> : t === "menu" ? <UtensilsCrossed className="h-3.5 w-3.5" /> : <Flame className="h-3.5 w-3.5" />}
+                  {t === "home" ? "Home" : t === "menu" ? "Menu" : "Offers"}
+                </button>
+              ))}
+            </nav>
+          </header>
+
           {tab === "home" && (
             <div className="sticky top-0 z-30 border-b backdrop-blur" style={{ background: `${template.background}dd`, borderColor: `${template.textColor}22` }}>
               <div className="mx-auto max-w-3xl px-5 py-3">

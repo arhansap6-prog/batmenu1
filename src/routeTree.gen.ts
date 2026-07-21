@@ -17,7 +17,6 @@ import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
-import { Route as RSlugBackupRouteImport } from './routes/r.$slug.backup'
 import { Route as AuthenticatedOwnerMenuRouteImport } from './routes/_authenticated/owner.menu'
 import { Route as AuthenticatedAdminRestaurantsRouteImport } from './routes/_authenticated/admin.restaurants'
 import { Route as AuthenticatedAdminMenuTemplatesRouteImport } from './routes/_authenticated/admin/menu-templates'
@@ -63,11 +62,6 @@ const AuthenticatedChangePasswordRoute =
     path: '/change-password',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const RSlugBackupRoute = RSlugBackupRouteImport.update({
-  id: '/backup',
-  path: '/backup',
-  getParentRoute: () => RSlugRoute,
-} as any)
 const AuthenticatedOwnerMenuRoute = AuthenticatedOwnerMenuRouteImport.update({
   id: '/owner/menu',
   path: '/owner/menu',
@@ -99,12 +93,11 @@ export interface FileRoutesByFullPath {
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/orders': typeof AuthenticatedOrdersRoute
-  '/r/$slug': typeof RSlugRouteWithChildren
+  '/r/$slug': typeof RSlugRoute
   '/admin/intro-video': typeof AuthenticatedAdminIntroVideoRoute
   '/admin/menu-templates': typeof AuthenticatedAdminMenuTemplatesRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/owner/menu': typeof AuthenticatedOwnerMenuRoute
-  '/r/$slug/backup': typeof RSlugBackupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -113,12 +106,11 @@ export interface FileRoutesByTo {
   '/change-password': typeof AuthenticatedChangePasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/orders': typeof AuthenticatedOrdersRoute
-  '/r/$slug': typeof RSlugRouteWithChildren
+  '/r/$slug': typeof RSlugRoute
   '/admin/intro-video': typeof AuthenticatedAdminIntroVideoRoute
   '/admin/menu-templates': typeof AuthenticatedAdminMenuTemplatesRoute
   '/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/owner/menu': typeof AuthenticatedOwnerMenuRoute
-  '/r/$slug/backup': typeof RSlugBackupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -129,12 +121,11 @@ export interface FileRoutesById {
   '/_authenticated/change-password': typeof AuthenticatedChangePasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
-  '/r/$slug': typeof RSlugRouteWithChildren
+  '/r/$slug': typeof RSlugRoute
   '/_authenticated/admin/intro-video': typeof AuthenticatedAdminIntroVideoRoute
   '/_authenticated/admin/menu-templates': typeof AuthenticatedAdminMenuTemplatesRoute
   '/_authenticated/admin/restaurants': typeof AuthenticatedAdminRestaurantsRoute
   '/_authenticated/owner/menu': typeof AuthenticatedOwnerMenuRoute
-  '/r/$slug/backup': typeof RSlugBackupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -150,7 +141,6 @@ export interface FileRouteTypes {
     | '/admin/menu-templates'
     | '/admin/restaurants'
     | '/owner/menu'
-    | '/r/$slug/backup'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -164,7 +154,6 @@ export interface FileRouteTypes {
     | '/admin/menu-templates'
     | '/admin/restaurants'
     | '/owner/menu'
-    | '/r/$slug/backup'
   id:
     | '__root__'
     | '/'
@@ -179,7 +168,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/menu-templates'
     | '/_authenticated/admin/restaurants'
     | '/_authenticated/owner/menu'
-    | '/r/$slug/backup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -187,7 +175,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AccessDeniedRoute: typeof AccessDeniedRoute
   AuthRoute: typeof AuthRoute
-  RSlugRoute: typeof RSlugRouteWithChildren
+  RSlugRoute: typeof RSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -248,13 +236,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChangePasswordRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/r/$slug/backup': {
-      id: '/r/$slug/backup'
-      path: '/backup'
-      fullPath: '/r/$slug/backup'
-      preLoaderRoute: typeof RSlugBackupRouteImport
-      parentRoute: typeof RSlugRoute
-    }
     '/_authenticated/owner/menu': {
       id: '/_authenticated/owner/menu'
       path: '/owner/menu'
@@ -309,23 +290,23 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface RSlugRouteChildren {
-  RSlugBackupRoute: typeof RSlugBackupRoute
-}
-
-const RSlugRouteChildren: RSlugRouteChildren = {
-  RSlugBackupRoute: RSlugBackupRoute,
-}
-
-const RSlugRouteWithChildren = RSlugRoute._addFileChildren(RSlugRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AccessDeniedRoute: AccessDeniedRoute,
   AuthRoute: AuthRoute,
-  RSlugRoute: RSlugRouteWithChildren,
+  RSlugRoute: RSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
