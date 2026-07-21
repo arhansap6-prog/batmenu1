@@ -13,8 +13,8 @@ import { ViewIn3DButton } from "@/components/ViewIn3D";
 
 
 
-import BurningBook3D from "@/components/BurningBook3D.v2";
 import { FireBookMenu } from "@/components/FireBookMenu";
+
 
 const menuQueryOptions = (slug: string) =>
   queryOptions({
