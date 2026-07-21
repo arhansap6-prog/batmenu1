@@ -14,7 +14,7 @@ export default function BurningBook3D({
 
       <Scene items={items} />
 
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0">
 
         <Navigation
           items={items}
