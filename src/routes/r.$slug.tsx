@@ -252,93 +252,113 @@ function PublicMenu() {
 
   return (
     <div className="min-h-screen pb-32" style={{ ...styleVars, background: template.background, color: template.textColor }}>
-      <header className="border-b" style={{ borderColor: `${template.textColor}22` }}>
-        <div className="mx-auto max-w-3xl px-5 py-10 text-center">
-          {r.cover_url && (
-            <img src={r.cover_url} alt="" className="mx-auto mb-4 h-40 w-full max-w-xl rounded-2xl object-cover" />
+      {tab === "menu" ? (
+        <FireBookMenu
+          restaurantName={r.name}
+          logoUrl={r.logo_url}
+          currency={r.currency}
+          categories={categories}
+          items={items}
+          template={template}
+          cart={Object.fromEntries(
+            Object.entries(cart).map(([id, l]) => [id, l.qty])
           )}
-          {r.logo_url && (
-            <img src={r.logo_url} alt={r.name} className="mx-auto mb-4 h-16 w-16 rounded-full object-cover ring-2" style={{ boxShadow: template.glow ? `0 0 40px ${template.accentFrom}` : undefined }} />
-          )}
-          <p className="text-xs uppercase tracking-widest" style={{ color: template.accentFrom }}>{r.category || "Menu"}</p>
-          <h1 className="mt-2 text-4xl font-semibold" style={headingStyle}>{r.name}</h1>
-          <p className="mt-1 text-xs" style={{ color: template.mutedColor }}>Prices in {r.currency}</p>
-        </div>
-        <nav className="mx-auto flex max-w-3xl gap-2 px-5 pb-4">
-          {(["home","menu","offers"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition"
-              style={tab === t
-                ? { background: `linear-gradient(135deg, ${template.accentFrom}, ${template.accentTo})`, color: "#fff" }
-                : { background: template.surface, color: template.mutedColor }}
-            >
-              {t === "home" ? <Home className="h-3.5 w-3.5" /> : t === "menu" ? <UtensilsCrossed className="h-3.5 w-3.5" /> : <Flame className="h-3.5 w-3.5" />}
-              {t === "home" ? "Home" : t === "menu" ? "Menu" : "Offers"}
-            </button>
-          ))}
-        </nav>
-      </header>
-
-      {tab === "home" && (
-        <div className="sticky top-0 z-30 border-b backdrop-blur" style={{ background: `${template.background}dd`, borderColor: `${template.textColor}22` }}>
-          <div className="mx-auto max-w-3xl px-5 py-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: template.mutedColor }} />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search dishes"
-                className="w-full rounded-full border py-2 pl-9 pr-3 text-sm outline-none"
-                style={{ background: template.surface, borderColor: `${template.textColor}22`, color: template.textColor }}
-              />
+          onAdd={(it) => addToCart(it as any)}
+          onBump={(id, d) => bump(id, d)}
+          onBack={() => setTab("home")}
+          onOpenCart={() => setShowCart(true)}
+          cartCount={cartCount}
+        />
+      ) : (
+        <>
+          <header className="border-b" style={{ borderColor: `${template.textColor}22` }}>
+            <div className="mx-auto max-w-3xl px-5 py-10 text-center">
+              {r.cover_url && (
+                <img src={r.cover_url} alt="" className="mx-auto mb-4 h-40 w-full max-w-xl rounded-2xl object-cover" />
+              )}
+              {r.logo_url && (
+                <img src={r.logo_url} alt={r.name} className="mx-auto mb-4 h-16 w-16 rounded-full object-cover ring-2" style={{ boxShadow: template.glow ? `0 0 40px ${template.accentFrom}` : undefined }} />
+              )}
+              <p className="text-xs uppercase tracking-widest" style={{ color: template.accentFrom }}>{r.category || "Menu"}</p>
+              <h1 className="mt-2 text-4xl font-semibold" style={headingStyle}>{r.name}</h1>
+              <p className="mt-1 text-xs" style={{ color: template.mutedColor }}>Prices in {r.currency}</p>
             </div>
-            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-              <FilterChip active={activeCat === "all"} onClick={() => setActiveCat("all")}>All</FilterChip>
-              {categories.map((c) => (
-                <FilterChip key={c.id} active={activeCat === c.id} onClick={() => setActiveCat(c.id)}>{c.name}</FilterChip>
+            <nav className="mx-auto flex max-w-3xl gap-2 px-5 pb-4">
+              {(["home","menu","offers"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTab(t)}
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition"
+                  style={tab === t
+                    ? { background: `linear-gradient(135deg, ${template.accentFrom}, ${template.accentTo})`, color: "#fff" }
+                    : { background: template.surface, color: template.mutedColor }}
+                >
+                  {t === "home" ? <Home className="h-3.5 w-3.5" /> : t === "menu" ? <UtensilsCrossed className="h-3.5 w-3.5" /> : <Flame className="h-3.5 w-3.5" />}
+                  {t === "home" ? "Home" : t === "menu" ? "Menu" : "Offers"}
+                </button>
               ))}
+            </nav>
+          </header>
+
+          {tab === "home" && (
+            <div className="sticky top-0 z-30 border-b backdrop-blur" style={{ background: `${template.background}dd`, borderColor: `${template.textColor}22` }}>
+              <div className="mx-auto max-w-3xl px-5 py-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: template.mutedColor }} />
+                  <input
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="Search dishes"
+                    className="w-full rounded-full border py-2 pl-9 pr-3 text-sm outline-none"
+                    style={{ background: template.surface, borderColor: `${template.textColor}22`, color: template.textColor }}
+                  />
+                </div>
+                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                  <FilterChip active={activeCat === "all"} onClick={() => setActiveCat("all")}>All</FilterChip>
+                  {categories.map((c) => (
+                    <FilterChip key={c.id} active={activeCat === c.id} onClick={() => setActiveCat(c.id)}>{c.name}</FilterChip>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          )}
+
+          <main className="mx-auto max-w-3xl px-5 py-8">
+            {tab === "offers" && (
+              <div className="space-y-3">
+                <h2 className="text-xl font-semibold" style={headingStyle}>Today's specials</h2>
+                {offers.length === 0 && <p className="text-sm" style={{ color: template.mutedColor }}>No specials today — check the full menu.</p>}
+                {offers.map((it) => (
+                  <DishRow key={it.id} it={it} r={r} template={template} isAI={aiIdSet.has(it.id)} cartQty={cart[it.id]?.qty} onAdd={() => addToCart(it)} onBump={(d) => bump(it.id, d)} />
+                ))}
+              </div>
+            )}
+
+            {tab === "home" && (
+              <div className="space-y-8">
+                {grouped.map((g) => (
+                  <section key={g.key} className="space-y-3">
+                    <h2 className="text-xl font-semibold" style={headingStyle}>{g.name}</h2>
+                    {g.items.map((it) => (
+                      <DishRow key={it.id} it={it} r={r} template={template} isAI={aiIdSet.has(it.id)} cartQty={cart[it.id]?.qty} onAdd={() => addToCart(it)} onBump={(d) => bump(it.id, d)} />
+                    ))}
+                  </section>
+                ))}
+                {grouped.length === 0 && (
+                  <p className="text-center text-sm" style={{ color: template.mutedColor }}>No dishes match your search.</p>
+                )}
+              </div>
+            )}
+
+            <p className="mt-16 text-center text-[10px] uppercase tracking-widest" style={{ color: template.mutedColor }}>
+              Powered by BAT MENU
+            </p>
+          </main>
+        </>
       )}
 
-      <main className="mx-auto max-w-3xl px-5 py-8">
 
-  {tab === "menu" && (
-  <FireBookMenu
-    restaurantName={r.name}
-    logoUrl={r.logo_url}
-    currency={r.currency}
-    categories={categories}
-    items={items}
-    template={template}
-    cart={Object.fromEntries(
-      Object.entries(cart).map(([id, l]) => [id, l.qty])
-    )}
-    onAdd={(it) => addToCart(it as any)}
-    onBump={(id, d) => bump(id, d)}
-    onBack={() => setTab("home")}
-    onOpenCart={() => setShowCart(true)}
-    cartCount={cartCount}
-  />
-)}
-
-        {tab === "offers" && (
-          <div className="space-y-3">
-            <h2 className="text-xl font-semibold" style={headingStyle}>Today's specials</h2>
-            {offers.length === 0 && <p className="text-sm" style={{ color: template.mutedColor }}>No specials today — check the full menu.</p>}
-            {offers.map((it) => (
-              <DishRow key={it.id} it={it} r={r} template={template} isAI={aiIdSet.has(it.id)} cartQty={cart[it.id]?.qty} onAdd={() => addToCart(it)} onBump={(d) => bump(it.id, d)} />
-            ))}
-          </div>
-        )}
-
-        <p className="mt-16 text-center text-[10px] uppercase tracking-widest" style={{ color: template.mutedColor }}>
-          Powered by BAT MENU
-        </p>
-      </main>
 
 
       {/* Sticky cart bar */}
