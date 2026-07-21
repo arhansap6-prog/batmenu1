@@ -16,6 +16,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import BurningBook3D from "./BurningBook3D";
 import HTMLFlipBook from "react-pageflip";
 import {
   ArrowLeft,
@@ -210,12 +211,9 @@ export function FireBookMenu({
       {/* Book stage */}
       <div className="relative z-10 flex flex-1 items-center justify-center px-2">
         {!opened ? (
-          <ClosedBookIntro
-            template={template}
-            restaurantName={restaurantName}
-            logoUrl={logoUrl}
-            onOpen={() => setOpened(true)}
-          />
+          <div onClick={() => setOpened(true)} className="cursor-pointer">
+  <BurningBook3D items={items} />
+</div>
         ) : (
           <div
             className="w-full max-w-[980px]"
